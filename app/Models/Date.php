@@ -15,4 +15,9 @@ class Date extends Model
 
         return $this->hasMany(RoomTransaction::class);
     }
+
+    public function trip_details(){
+
+        return $this->hasMany(TripDetail::class);
+    }
 }

@@ -26,5 +26,18 @@ class Region extends Model
         return $this->hasMany(Hotel::class);
     }
 
+    public function lists()
+    {
+        return $this->morphToMany(favoriteList::class,'favorable','favorite');
+    }
 
+    public function photos()
+    {
+        return $this->morphMany(photo::class, 'photoable');
+    }
+
+    public function reviews()
+    {
+        return $this->morphToMany(favoriteList::class,'reviewable','reviews');
+    }
 }

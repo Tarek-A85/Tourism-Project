@@ -30,4 +30,14 @@ class Transaction extends Model
 
         return $this->hasMany(RoomTransaction::class);
     }
+
+    public function package_transactions()
+    {
+        return $this->hasMany(PackageTransaction::class);
+    }
+
+    public function flight_transactions()
+    {
+        return $this->hasMany(FlightTransaction::class);
+    }
 }

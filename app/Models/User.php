@@ -53,4 +53,37 @@ class User extends Authenticatable
         
         return $this->hasOne(Wallet::class);
     }
+
+    public function lists()
+    {
+        return $this->hasMany(favoriteList::class);
+    }
+
+    public function photo()
+    {
+        return $this->morphOne(photo::class, 'photoable');
+    }
+    
+    //polymorphic many to many for review
+    //-----------\\
+    public function comapnies()
+    {
+        return $this->morphedByMany(company::class,'reviewable','reviews');   
+    }
+
+    public function regions()
+    {
+        return $this->morphedByMany(company::class,'reviewable','reviews');    
+    }
+
+    public function hotles()
+    {
+        return $this->morphedByMany(company::class,'reviewable','reviews');     
+    }
+
+    public function packages()
+    {
+        return $this->morphedByMany(company::class,'reviewable','reviews');    
+    }
+    //-----------\\
 }

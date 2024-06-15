@@ -5,25 +5,15 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Hotel extends Model
+class Company extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['name', 'region_id', 'stars'];
+    protected $fillable = ['name'];
 
-    public function region(){
-
-        return $this->belongsTo(Region::class);
-    }
-
-    public function previleges(){
-
-        return $this->belongsToMany(Previlege::class);
-    }
-
-    public function room()
+    public function flights()
     {
-        return $this->hasOne(Room::class);
+        return $this->hasMany(flight::class);
     }
 
     public function lists()
@@ -35,7 +25,7 @@ class Hotel extends Model
     {
         return $this->morphMany(photo::class, 'photoable');
     }
-    
+
     public function reviews()
     {
         return $this->morphToMany(favoriteList::class,'reviewable','reviews');
