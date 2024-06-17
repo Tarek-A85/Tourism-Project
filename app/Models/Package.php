@@ -11,18 +11,23 @@ class Package extends Model
 
     protected $guarded = ['id'];
 
-    public function lists()
+    public function favorite()
     {
-        return $this->morphToMany(favoriteList::class,'favorable','favorite');
+        return $this->morphMany(Favorite::class,'favorable');
     }
 
     public function reviews()
     {
-        return $this->morphToMany(favoriteList::class,'reviewable','reviews');
+        return $this->morphMany(Review::class,'reviewable');
     }
 
     public function trip_detail()
     {
         return $this->morphMany(TripDetail::class,'detailable','tripdetails');
+    }
+
+    public function package_areas(){
+
+        return $this->hasMany(PackageArea::class);
     }
 }

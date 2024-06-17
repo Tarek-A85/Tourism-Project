@@ -11,4 +11,14 @@ class Favorite extends Model
 
     protected $guarded = ['id'];
 
+    public function list(){
+
+        return $this->belongsTo(FavoriteList::class);
+    }
+
+    public function favorable(){
+
+        return $this->morphTo(__FUNCTION__, 'favorable_type', 'favorable_id');
+    }
+
 }

@@ -11,10 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('photos', function (Blueprint $table) {
+        Schema::create('package_areas', function (Blueprint $table) {
             $table->id();
-            $table->morphs('photoable');
-            $table->string('path');
+            $table->foreignId('package_id')->constrained()->cascadeOnDelete();
+            $table->morphs('visitable');
+            $table->integer('period');
             $table->timestamps();
         });
     }
@@ -24,6 +25,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('photos');
+        Schema::dropIfExists('package_areas');
     }
 };

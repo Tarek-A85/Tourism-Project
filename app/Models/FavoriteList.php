@@ -18,26 +18,9 @@ class FavoriteList extends Model
         return $this->belongsTo(User::class);
     }
 
-    //polymorphic many to many favorite
-    //-----------\\
-    public function comapnies()
-    {
-        return $this->morphedByMany(company::class,'favorable','favorites');   
+    public function favorites(){
+
+        return $this->hasMany(Favorite::class);
     }
 
-    public function regions()
-    {
-        return $this->morphedByMany(region::class,'favorable','favorites');   
-    }
-
-    public function hotles()
-    {
-        return $this->morphedByMany(Hotel::class,'favorable','favorites');   
-    }
-
-    public function packages()
-    {
-        return $this->morphedByMany(package::class,'favorable','favorites');   
-    }
-    //-----------\\
 }

@@ -26,9 +26,9 @@ class Hotel extends Model
         return $this->hasOne(Room::class);
     }
 
-    public function lists()
+    public function favorite()
     {
-        return $this->morphToMany(favoriteList::class,'favorable','favorite');
+        return $this->morphMany(Favorite::class,'favorable');
     }
 
     public function photos()
@@ -38,6 +38,11 @@ class Hotel extends Model
     
     public function reviews()
     {
-        return $this->morphToMany(favoriteList::class,'reviewable','reviews');
+        return $this->morphMany(Review::class,'reviewable');
+    }
+
+    public function package_areas(){
+
+        return $this->morphMany(PackageArea::class, 'visitable');
     }
 }

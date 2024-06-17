@@ -17,9 +17,14 @@ class Flight extends Model
         return $this->belongsTo(Company::class);
     }
 
-    public function regions()
+    public function starting_city()
     {
-        return $this->belongsTo(Region::class);
+        return $this->belongsTo(Region::class, 'starting_city_id');
+    }
+
+    public function ending_city(){
+
+        return $this->belongsTo(Region::class, 'ending_city_id');
     }
 
     public function trip_detail()

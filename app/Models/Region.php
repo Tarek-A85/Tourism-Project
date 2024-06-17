@@ -26,9 +26,9 @@ class Region extends Model
         return $this->hasMany(Hotel::class);
     }
 
-    public function lists()
+    public function favorites()
     {
-        return $this->morphToMany(favoriteList::class,'favorable','favorite');
+        return $this->morphMany(Favorite::class,'favorable');
     }
 
     public function photos()
@@ -38,6 +38,12 @@ class Region extends Model
 
     public function reviews()
     {
-        return $this->morphToMany(favoriteList::class,'reviewable','reviews');
+        return $this->morphMany(favoriteList::class,'reviewable');
+    }
+
+    public function package_areas(){
+
+        return $this->morphMany(PackageArea::class, 'visitable');
+
     }
 }

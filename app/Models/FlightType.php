@@ -13,6 +13,6 @@ class FlightType extends Model
 
     public function flights()
     {
-        return $this->hasMany(flight::class);
+        return $this->hasMany(FlightTransaction::class);
     }
 }

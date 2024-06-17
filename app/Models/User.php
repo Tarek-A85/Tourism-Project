@@ -63,27 +63,11 @@ class User extends Authenticatable
     {
         return $this->morphOne(photo::class, 'photoable');
     }
+
+    public function reviews(){
+
+        return $this->hasMany(Review::class);
+    }
     
-    //polymorphic many to many for review
-    //-----------\\
-    public function comapnies()
-    {
-        return $this->morphedByMany(company::class,'reviewable','reviews');   
-    }
-
-    public function regions()
-    {
-        return $this->morphedByMany(company::class,'reviewable','reviews');    
-    }
-
-    public function hotles()
-    {
-        return $this->morphedByMany(company::class,'reviewable','reviews');     
-    }
-
-    public function packages()
-    {
-        return $this->morphedByMany(company::class,'reviewable','reviews');    
-    }
-    //-----------\\
+   
 }
