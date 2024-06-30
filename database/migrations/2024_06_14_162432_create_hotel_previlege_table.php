@@ -12,8 +12,8 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('hotel_previlege', function (Blueprint $table) {
-           $table->foreignId('hotel_id')->constrained();
-           $table->foreignId('previlege_id')->constrained();
+           $table->foreignId('hotel_id')->constrained()->cascadeOnDelete();
+           $table->foreignId('previlege_id')->constrained()->cascadeOnDelete();
            $table->integer('period')->nullable();
            $table->timestamps();
         });

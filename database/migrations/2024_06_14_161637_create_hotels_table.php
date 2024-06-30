@@ -17,6 +17,7 @@ return new class extends Migration
             $table->foreignId('region_id')->constrained();
             $table->decimal('stars', 5, 2);
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 

@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Password;
-
+use App\Notifications\SendCodeNotification;
 class AuthenticatedController extends Controller
 {
     public function singup(Request $request)
@@ -33,6 +33,8 @@ class AuthenticatedController extends Controller
             }
 
             $user = User::create($request->all());
+
+            $user->notify(new SendCodeNotification('Please verify your email using the code below'));
 
             return response()->json([
                 'status' => true,
@@ -75,6 +77,16 @@ class AuthenticatedController extends Controller
             }
 
             $user = User::where('email', $request->email)->first();
+
+           if($user->email_verified_at == null){
+            $user->notify(new SendCodeNotification('Please verify your email using the code below'));
+
+            return response()->json([
+                "status" => true,
+                "message" => "Please verify your email, code is sent to you",
+                "data" => ["token" => $user->createToken('verify_user_token')->plainTextToken],
+            ]);
+           }
 
             return response()->json([
                 'status' => true,

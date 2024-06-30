@@ -3,8 +3,10 @@
 namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
-use Laravel\Sanctum\PersonalAccessToken;
-use Laravel\Sanctum\Sanctum;
+use Illuminate\Foundation\AliasLoader;
+
+
+
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -13,7 +15,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        $loader = AliasLoader::getInstance();
+        $loader->alias('Otp', Ichtrojan\Otp\Otp::class);
     }
 
     /**
@@ -21,6 +24,6 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        Sanctum::usePersonalAccessTokenModel(PersonalAccessToken::class);
+        
     }
 }
