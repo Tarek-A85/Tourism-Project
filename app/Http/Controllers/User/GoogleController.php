@@ -5,8 +5,8 @@ namespace App\Http\Controllers\User;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
-use App\Http\Requests\User\GoogleSignInRequest;
 use App\Models\User;
+use Illuminate\Support\Facades\Auth;
 class GoogleController extends Controller
 {
     public function sign_up(Request $request){
@@ -27,10 +27,10 @@ class GoogleController extends Controller
           }
 
         $user = User::create([
-            'first_name' => $request->first_name,
-            'last_name' => $request->last_name,
+            'name' => $request->name,
             'email' => $request->email,
             'google_id' => $request->google_id,
+            'email_verified_at' => now(),
         ]);
 
        
@@ -39,7 +39,7 @@ class GoogleController extends Controller
 
         return response()->json([
             "statue" => true,
-            "message" => "your are registered",
+            "message" => "Your are registered successfully",
             "data" => ["token" => $token],
         ]);
 
@@ -55,7 +55,7 @@ class GoogleController extends Controller
     }
 
     public function sign_in(Request $request){
-        try{
+       // try{
 
         $validator = Validator::make($request->all(), [
             'email' => 'required',
@@ -70,35 +70,33 @@ class GoogleController extends Controller
             ]);
           }
 
-        if(!Auth::attempt(['email' => $request->email, 'google_id' => $request->google_id])){
+          $user = User::where('email', $request->email)->where('google_id', $request->google_id)->first();
 
+          if(!$user){
             return response()->json([
-                "status" => false,
-                "message" => "Email and password does not match",
-                "data" => null,
-            ]);
-        }
-        else{
+              "status" => false,
+              "message" => "There is no user with these credentials",
+              "data" => null,
+          ]);
+          }
 
-            $token = auth()->user()->createToken('sign_in_token')->plainTextToken;
+            $token = $user->createToken('SignInToken')->plainTextToken;
 
             return response()->json([
                 "status" => true,
-                "message" => "You are loggen in successfully",
+                "message" => "You are logged in successfully",
                 "data" => ["token" => $token],
 
             ]);
+       
 
+    // } catch(\Exception $e){
 
-        }
-
-    } catch(\Exception $e){
-
-        return response()->json([
-          "status" => false,
-          "message" => "Something went wrong",
-          "data" => null,
-        ]);
-      }
+    //     return response()->json([
+    //       "status" => false,
+    //       "message" => "Something went wrong",
+    //       "data" => null,
+    //     ]);
+    //   }
 }
 }

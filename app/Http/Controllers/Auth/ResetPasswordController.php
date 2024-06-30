@@ -18,8 +18,10 @@ class ResetPasswordController extends Controller
         auth()->user()->notify(new SendCodeNotification ("Please use the code below to allow you to change the password") );
 
         return response()->json([
-            "message" => "A code is sent to your email, use it to allow you to change the password"
-        ], 200);
+            "status" => true,
+            "message" => "A code is sent to your email, use it to allow you to change the password",
+            "data" => null,
+        ]);
 
     } catch(\Exception $e){
         
@@ -33,7 +35,7 @@ class ResetPasswordController extends Controller
 
     }
 
-    public function verify_code(Request $request){
+    public function validate_code(Request $request){
 
         try{
             $validator = Validator::make($request->all(), [
@@ -85,8 +87,8 @@ class ResetPasswordController extends Controller
     public function reset_password(Request $request){
 
         try{
-        $validator = Validator::make($request->all,[
-            'new_password' => 'required',
+        $validator = Validator::make($request->all(),[
+            'new_password' => 'required|confirmed',
         ]);
 
         if($validator->fails()){
@@ -108,8 +110,10 @@ class ResetPasswordController extends Controller
         }
 
         auth()->user()->update([
-            "password" => bcrypt($request->password),
+            "password" => bcrypt($request->new_password),
         ]);
+
+        DB::table('password_reset_tokens')->where('email', auth()->user()->email)->delete();
 
         return response()->json([
             "status" => true,
