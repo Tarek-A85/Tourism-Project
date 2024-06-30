@@ -9,6 +9,7 @@ use Ichtrojan\Otp\Otp;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Rules\Password;
 class ResetPasswordController extends Controller
 {
     public function send_code(){
@@ -88,7 +89,7 @@ class ResetPasswordController extends Controller
 
         try{
         $validator = Validator::make($request->all(),[
-            'new_password' => 'required|confirmed',
+            'new_password' => ['required', 'confirmed', Password::min(8)],
         ]);
 
         if($validator->fails()){
