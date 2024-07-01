@@ -102,7 +102,7 @@ class ResetPasswordController extends Controller
 
         $check = DB::table('password_reset_tokens')->where('email', auth()->user()->email)->first();
 
-        if($request->reset_token == null || $check->token != $request->reset_token){
+        if(!$check || $request->reset_token == null || $check->token != $request->reset_token){
             return response()->json([
                 "status" => false,
                 "message" => "you are not authorized to reset your password",
@@ -115,6 +115,8 @@ class ResetPasswordController extends Controller
         ]);
 
         DB::table('password_reset_tokens')->where('email', auth()->user()->email)->delete();
+
+        auth()->user()->tokens()->delete();
 
         return response()->json([
             "status" => true,

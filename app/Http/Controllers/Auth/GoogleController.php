@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\User;
+namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
@@ -14,6 +14,7 @@ class GoogleController extends Controller
         try{
 
         $validator = Validator::make($request->all(), [
+            'name' => 'required',
             'email' => 'required|unique:users',
             'google_id' => 'required|unique:users',
         ]);
@@ -55,7 +56,7 @@ class GoogleController extends Controller
     }
 
     public function sign_in(Request $request){
-       // try{
+        try{
 
         $validator = Validator::make($request->all(), [
             'email' => 'required',
@@ -90,13 +91,13 @@ class GoogleController extends Controller
             ]);
        
 
-    // } catch(\Exception $e){
+    } catch(\Exception $e){
 
-    //     return response()->json([
-    //       "status" => false,
-    //       "message" => "Something went wrong",
-    //       "data" => null,
-    //     ]);
-    //   }
+        return response()->json([
+          "status" => false,
+          "message" => "Something went wrong",
+          "data" => null,
+        ]);
+      }
 }
 }

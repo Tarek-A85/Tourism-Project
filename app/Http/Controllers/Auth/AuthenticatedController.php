@@ -109,7 +109,7 @@ class AuthenticatedController extends Controller
         try{
 
             $user = auth()->user();
-            $user->tokens()->delete();
+            $user->currentAccessToken()->delete();
             return response()->json([
                 'status' => true,
                 'message' => 'logged out successfully',
