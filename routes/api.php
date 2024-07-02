@@ -11,9 +11,7 @@ use App\Http\Controllers\Auth\{
     ForgotPasswordController,
 };
 use App\Http\Controllers\User\WalletController;
-use App\Models\Wallet;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Hash;
+
 
 Route::get('/user', function (Request $request) {
     return $request->user();
@@ -39,7 +37,11 @@ Route::middleware(['auth:sanctum'])->group(function(){
      Route::middleware('verified')->group(function(){
         
         Route::middleware('can_change_password')->group(function(){
+
+            //wallet , "send" code and "validate resetting code" are as same as the fanction user reset password 
+            Route::post('/reset/wallet/password',[WalletController::class,'restePassword'])->name('reset_wallet_password');
             Route::post('/create/wallet',[WalletController::class,'create'])->name('create_wallet');
+            
             Route::get('/send/resetting/code', [ResetPasswordController::class, 'send_code'])->name('send_resetting_code')->middleware('throttle:resetting_code');
             Route::post('/validate/resetting/code', [ResetPasswordController::class, 'validate_code'])->name('validate_resetting_code');
             Route::post('/reset/password', [ResetPasswordController::class, 'reset_password'])->name('reset_password');
