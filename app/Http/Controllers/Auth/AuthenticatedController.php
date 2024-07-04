@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Jobs\SendingCodeJob;
 use App\Models\User;
 use Exception;
 use Illuminate\Http\Request;
@@ -42,7 +43,6 @@ class AuthenticatedController extends Controller
             }
 
             $user = User::create($request->all());
-
             $user->notify(new SendCodeNotification('Please verify your email using the code below'));
 
             return response()->json([
@@ -77,9 +77,13 @@ class AuthenticatedController extends Controller
                 ], 401);
             };
 
-            if (!Auth::attempt(['email' => $request->email, 'password' => $request->password])) {
+            if (!Auth::attempt([
+                'email' => $request->email,
+                'password' => $request->password,
+                'is_admin' => $request->is_admin
+            ])) {
                 return response()->json([
-                    'status' => true,
+                    'status' => false,
                     'message' => 'email and password does not match',
                     'data' => null
                 ], 401);
@@ -88,9 +92,8 @@ class AuthenticatedController extends Controller
             $user = User::where('email', $request->email)
                 ->where('is_admin', $request->is_admin)->first();
 
-            if (($request->is_admin && !$user->is_admin) ||
-                (!$request->is_admin && $user->is_admin)) 
-            {
+
+            if (($request->is_admin && !$user->is_admin) || (!$request->is_admin && $user->is_admin)) {
                 return response()->json([
                     "status" => false,
                     "message" => "you are not authorized",
@@ -113,7 +116,6 @@ class AuthenticatedController extends Controller
                 'message' => 'logged in successfully',
                 'data' => ['token' => $user->createToken('userToken')->plainTextToken]
             ]);
-
         } catch (Exception $E) {
 
             return response()->json([
