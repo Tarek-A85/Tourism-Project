@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\Rule;
 class GoogleController extends Controller
 {
     public function sign_up(Request $request){
@@ -15,8 +16,8 @@ class GoogleController extends Controller
 
         $validator = Validator::make($request->all(), [
             'name' => 'required',
-            'email' => 'required|unique:users',
-            'google_id' => 'required|unique:users',
+            'email' => ['required', Rule::unique('users', 'email')->where(fn ($query) => $query->where('is_admin', false))],
+            'google_id' => ['required', Rule::unique('users', 'google_id')->where(fn ($query) => $query->where('is_admin', false))],
         ]);
 
         if($validator->fails()){
@@ -61,6 +62,7 @@ class GoogleController extends Controller
         $validator = Validator::make($request->all(), [
             'email' => 'required',
             'google_id' => 'required',
+            'is_admin' => 'required|boolean',
         ]);
 
         if($validator->fails()){
@@ -71,12 +73,17 @@ class GoogleController extends Controller
             ]);
           }
 
-          $user = User::where('email', $request->email)->where('google_id', $request->google_id)->first();
+          $user = User::where('email', $request->email)->where('google_id', $request->google_id)->where('is_admin',$request->is_admin)->first();
+
+          if($request->is_admin)
+          $rule= 'admin';
+        else
+        $rule= 'user';
 
           if(!$user){
             return response()->json([
               "status" => false,
-              "message" => "There is no user with these credentials",
+              "message" => "There is no $rule with these credentials",
               "data" => null,
           ]);
           }

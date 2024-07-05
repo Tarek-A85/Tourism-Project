@@ -8,6 +8,8 @@ use Illuminate\Http\Exceptions\ThrottleRequestsException;
 use Illuminate\Http\Request;
 use  App\Http\Middleware\CanChangePasswordMiddleware;
 use  App\Http\Middleware\CheckEmailMiddleware;
+use  App\Http\Middleware\CheckAdminMiddleware;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
         web: __DIR__.'/../routes/web.php',
@@ -19,6 +21,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'can_change_password' => CanChangePasswordMiddleware::class,
             'check_email' => CheckEmailMiddleware::class,
+            'check_admin' => CheckAdminMiddleware::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
@@ -33,8 +36,17 @@ return Application::configure(basePath: dirname(__DIR__))
             }
             });
 
+        $exceptions->render(function (NotFoundHttpException $e, Request $request){
+            if ($request->wantsJson()) {
+                return response()->json([
+                    "status" => false,
+                    "message" => "There is no object like that",
+                    "data" => null,
+                ]);
+            }
+            });
 
-               
+  
 
 
 

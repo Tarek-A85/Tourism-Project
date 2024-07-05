@@ -16,7 +16,9 @@ return new class extends Migration
             $table->string('name');
             $table->text('description');
             $table->foreignId('region_id')->nullable()->constrained('regions');
+            $table->unique(['name', 'region_id']);
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 

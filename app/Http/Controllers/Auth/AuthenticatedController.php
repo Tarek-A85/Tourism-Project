@@ -79,7 +79,7 @@ class AuthenticatedController extends Controller
 
             if (!Auth::attempt(['email' => $request->email, 'password' => $request->password])) {
                 return response()->json([
-                    'status' => true,
+                    'status' => false,
                     'message' => 'email and password does not match',
                     'data' => null
                 ], 401);

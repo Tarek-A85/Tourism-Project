@@ -24,7 +24,6 @@ return new class extends Migration
             $table->rememberToken();
             $table->timestamps();
             $table->softDeletes();
-
             $table->unique(['email','is_admin'],'allow_same_email_for_user&admin');
         });
 

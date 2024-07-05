@@ -10,14 +10,10 @@ use App\Http\Controllers\Auth\{
     GoogleController,
     ForgotPasswordController,
 };
+use App\Http\Controllers\Both\{
+    RegionController,
 
-
-
-
-
-Route::get('/user', function (Request $request) {
-    return $request->user();
-})->middleware('auth:sanctum');
+};
 
 
 Route::post('google/signup', [GoogleController::class, 'sign_up'])->name('google_sign_up');
@@ -43,8 +39,14 @@ Route::middleware(['auth:sanctum'])->group(function(){
             Route::post('/validate/resetting/code', [ResetPasswordController::class, 'validate_code'])->name('validate_resetting_code');
             Route::post('/reset/password', [ResetPasswordController::class, 'reset_password'])->name('reset_password');
         });
+
+        Route::prefix('admin')->middleware('check_admin')->group(function(){
+            Route::delete('regions/archive/{region}', [RegionController::class, 'archive']);
+            Route::apiResource('regions', RegionController::class)->only(['store', 'update', 'destroy']);
+        });
       
         Route::delete('/logout',[AuthenticatedController::class,'logout']);
+        Route::apiResource('regions', RegionController::class)->only(['index', 'show']);
      });
    
 });
