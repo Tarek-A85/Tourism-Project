@@ -137,7 +137,7 @@ class RegionController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Region $region)
+    public function update(Request $request, String $id)
     {
         try{
             $messages = [
@@ -147,8 +147,18 @@ class RegionController extends Controller
                 'added_photos.*.required' => 'You must add the inserted photos if the exist',
             ];
 
+        $region = Region::withTrashed()->find($id);
+
+        if(!$region){
+            return response()->json([
+                "status" => false,
+                "message" => "There is no object like that",
+                "data" => null,
+            ]);
+        }
+
         $validator = Validator::make($request->all(),[
-            'name' => ['required', Rule::unique('regions', 'name')->where(fn ($query) => $query->where('id', '!=', $region->id)->where('region_id', ($region->country()->exists() ? $region->country->id : null)))],
+            'name' => ['required', Rule::unique('regions', 'name')->where(fn ($query) => $query->where('id', '!=', $region->id)->where('region_id', ($region->country()->withTrashed()->exists() ? $region->country()->withTrashed()->first()->id : null)))],
             'description' => ['required', 'max:200'],
             'deleted_photos' => ['nullable', 'array'],
             'deleted_photos.*' => ['required', Rule::exists('photos', 'id')->where(fn ($query) => $query->where('photoable_id',  $region->id))],
@@ -182,7 +192,7 @@ class RegionController extends Controller
 
         if($region->region_id){
 
-            $country = Region::find($region->region_id)->name;
+            $country = Region::withTrashed()->find($region->region_id)->name;
             $city = $request->name;
          }
          else{
@@ -190,6 +200,7 @@ class RegionController extends Controller
             $country = $city = $request->name;
          }
          if($request->added_photos){
+
         foreach($request->added_photos as $photo){
 
             $extension = $photo->getClientOriginalExtension();
@@ -228,11 +239,22 @@ class RegionController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Region $region)
+    public function destroy(String $id)
     {
         try{
 
-        if($region->cities()->exists()|| $region->hotels()->exists() || $region->package_areas()->exists() ){
+            $region = Region::withTrashed()->find($id);
+
+            if(!$region){
+
+                return response()->json([
+                    "status" => false,
+                    "message" => "There is no object like that",
+                    "data" => null,
+                ]);
+            }
+
+        if($region->cities()->withTrashed()->exists()|| $region->hotels()->withTrashed()->exists() || $region->package_areas()->exists() ){
             return response()->json([
                 "status" => false,
                 "message" => "You can't permenentaly delete this region, it's used at some places",
@@ -242,8 +264,8 @@ class RegionController extends Controller
 
            $country = null;
             
-            if($region->country()->exists())
-             $country = $region->country->name;
+            if($region->country()->withTrashed()->exists())
+             $country = $region->country()->withTrashed()->first()->name;
 
             Storage::deleteDirectory('Regions/' . $country . '/' . $region->name);
 
@@ -271,11 +293,22 @@ class RegionController extends Controller
 
         try{
 
+        $string = null;
+
+        if($region->cities()->exists()){
+
+            $string = " And it's cities";
+
+            foreach($region->cities as $city){
+                $city->delete();
+            }
+        }
+
         $region->delete();
 
         return response()->json([
             "status" => false,
-            "message" => "Region is temporariy deleted successfully",
+            "message" => "Region" . $string . " is temporariy deleted successfully",
             "data" => null,
 
         ]);
@@ -289,9 +322,121 @@ class RegionController extends Controller
         }
 }
 
+    public function index_archived(){
+
+        try{
+
+        $regions = Region::onlyTrashed()->select('id', 'name')->get();
+
+        return response()->json([
+            "status" => true,
+            "message" => "Archived regions",
+            "data" => ["regions" => $regions],
+        ]);
+
+        } catch(\Exception $e){
+
+            return response()->json([
+            "status" => false,
+            "message" => "Something went wrong",
+            "data" => null,
+        ]);
+    }
+
+    }
+
+    public function show_archived(String $id){
+
+        try{
+
+        $region = Region::withTrashed()->where('id', $id)->first();
+
+        if(!$region){
+            return response()->json([
+                "status" => false,
+                "message" => "There is no object like that",
+                "data" => null,
+            ]);
+        }
+        if($region->deleted_at == null){
+            return response()->json([
+                "status" => false,
+                "message" => "The region isn't in the archive",
+                "data" => null,
+            ]);
+        }
+
+       $region->load('photos:id,path,photoable_id');
+       
+       $region->cities = $region->cities()->onlyTrashed()->select('id','name')->get();
+
+       $region->country = $region->country()->withTrashed()->select('id', 'name')->get();
+
+       
+
+        return response()->json([
+            "status" => true,
+            "message" => "Archived region info",
+            "data" => ["region" => $region],
+
+        ]);
+
+        } catch(\Exception $e){
+
+            return response()->json([
+                "status" => false,
+                "message" => "Something went wrong",
+                "data" => null,
+            ]);
+        }
+        }
+
+    public function restore_archived(String $id){
+
+        try{
+
+         $region = Region::onlyTrashed()->find($id);
+
+         if(!$region){
+
+            return response()->json([
+                "status" => false,
+                "message" => "There is no object like that",
+                "data" => null,
+            ]);
+         }
+
+         $string = null;
+
+         if($region->country()->onlyTrashed()->exists()){
+
+            $string = " With it's country";
+
+            $region->country()->onlyTrashed()->first()->restore();
+         }
+
+         $region->restore();
+
+         return response()->json([
+            "status" => true,
+            "message" => "Region" . $string . " restored",
+            "data" => null,
+         ]);
+
+        } catch(\Exception $e){
+            return response()->json([
+                "status" => false,
+                "message" => "Something went wrong",
+                "data" => null,
+            ]);
+        }
+
+        }
+    }
+
     
         
-    }
+
 
 
 

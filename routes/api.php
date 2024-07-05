@@ -56,6 +56,9 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
         Route::prefix('admin')->middleware('check_admin')->group(function(){
             Route::delete('regions/archive/{region}', [RegionController::class, 'archive']);
+            Route::get('regions/archived', [RegionController::class, 'index_archived']);
+            Route::get('regions/show/archived/{id}', [RegionController::class, 'show_archived']);
+            Route::get('regions/restore/archived/{id}', [RegionController::class, 'restore_archived']);
             Route::apiResource('regions', RegionController::class)->only(['store', 'update', 'destroy']);
         });
       
