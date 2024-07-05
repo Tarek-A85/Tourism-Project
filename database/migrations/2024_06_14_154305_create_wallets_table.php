@@ -17,6 +17,8 @@ return new class extends Migration
             $table->decimal('balance', 12, 2);
             $table->string('password');
             $table->timestamps();
+
+            $table->unique('user_id','one_wallet_for_user');
         });
     }
 

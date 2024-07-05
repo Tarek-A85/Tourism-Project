@@ -4,19 +4,19 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-
+use Illuminate\Database\Eloquent\SoftDeletes;
 class Region extends Model
 {
-    use HasFactory;
+    use HasFactory, SoftDeletes;
 
     protected $fillable = ['name', 'description', 'region_id'];
 
-    public function children(){
+    public function cities(){
 
         return $this->hasMany(Region::class, 'region_id');
     }
 
-    public function parent(){
+    public function country(){
 
         return $this->belongsTo(Region::class, 'region_id');
     }
