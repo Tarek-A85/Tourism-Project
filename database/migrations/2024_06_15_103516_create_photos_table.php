@@ -13,8 +13,8 @@ return new class extends Migration
     {
         Schema::create('photos', function (Blueprint $table) {
             $table->id();
-            $table->morphs('photoable');
-            $table->string('path');
+            $table->foreignId('folder_id')->constrained('folders')->cascadeOnDelete();
+            $table->string('name');
             $table->timestamps();
         });
     }

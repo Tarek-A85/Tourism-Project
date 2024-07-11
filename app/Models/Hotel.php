@@ -10,18 +10,21 @@ class Hotel extends Model
 {
     use HasFactory, SoftDeletes;
 
-    protected $fillable = ['name', 'region_id', 'stars'];
+    protected $fillable = ['name', 'region_id', 'stars', 'description'];
+
+   
 
     public function region(){
 
-        return $this->belongsTo(Region::class);
+        return $this->belongsTo(Region::class)->with('country:id,name');
     }
 
     public function previleges(){
 
-        return $this->belongsToMany(Previlege::class);
+        return $this->belongsToMany(Previlege::class)->withPivot('period')->as('info');
     }
 
+   
     public function room()
     {
         return $this->hasOne(Room::class);
