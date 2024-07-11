@@ -70,11 +70,11 @@ class EmailVerificationController extends Controller
 
     public function resend_verification_code(){
 
-      try{
+      
 
       if(auth()->user()->email_verified_at != null){
         return response()->json([
-          "status" => true,
+          "status" => false,
           "message" => "You are already verified",
           "data" => null,
         ]);
@@ -88,15 +88,7 @@ class EmailVerificationController extends Controller
             "data" => null,
         ]);
 
-    } catch(\Exception $e){
-
-      return response()->json([
-        "status" => false,
-        "message" => "Something went wrong",
-        "data" => null,
-      ]);
-
-    }
+   
 
 
   }

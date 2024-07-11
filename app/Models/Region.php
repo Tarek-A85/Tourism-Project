@@ -11,6 +11,8 @@ class Region extends Model
 
     protected $fillable = ['name', 'description', 'region_id'];
 
+   
+
     public function cities(){
 
         return $this->hasMany(Region::class, 'region_id');
@@ -20,6 +22,9 @@ class Region extends Model
 
         return $this->belongsTo(Region::class, 'region_id');
     }
+
+    
+        
 
     public function hotels(){
 
@@ -31,10 +36,7 @@ class Region extends Model
         return $this->morphMany(Favorite::class,'favorable');
     }
 
-    public function photos()
-    {
-        return $this->morphMany(photo::class, 'photoable');
-    }
+   
 
     public function reviews()
     {

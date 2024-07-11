@@ -12,9 +12,13 @@ use App\Http\Controllers\Auth\{
 };
 use App\Http\Controllers\Both\{
     RegionController,
+    HotelController,
 };
 
 use App\Http\Controllers\User\WalletController;
+
+
+    
 
 
 
@@ -59,11 +63,14 @@ Route::middleware(['auth:sanctum'])->group(function () {
             Route::get('regions/archived', [RegionController::class, 'index_archived']);
             Route::get('regions/show/archived/{id}', [RegionController::class, 'show_archived']);
             Route::get('regions/restore/archived/{id}', [RegionController::class, 'restore_archived']);
+            Route::get('regions/cities', [RegionController::class, 'cities']);
             Route::apiResource('regions', RegionController::class)->only(['store', 'update', 'destroy']);
+            Route::apiResource('hotels', HotelController::class)->only(['store', 'update', 'destroy']);
         });
       
         Route::delete('/logout',[AuthenticatedController::class,'logout']);
         Route::apiResource('regions', RegionController::class)->only(['index', 'show']);
+        Route::apiResource('hotels', HotelController::class)->only(['index', 'show']);
      });
    
 });

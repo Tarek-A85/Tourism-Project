@@ -6,20 +6,22 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Region;
 use App\Models\Photo;
+use App\Models\Folder;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
 use Exception;
 use Illuminate\Support\Str;
+use App\Traits\GeneralTrait;
 class RegionController extends Controller
 {
+    use GeneralTrait;
     /**
      * Display a listing of the resource.
      */
     public function index()
     {
-        try{
-
+        
         $countries = Region::where('region_id', null)->select('id', 'name')->get();
 
         return response()->json([
@@ -28,14 +30,6 @@ class RegionController extends Controller
             "data" => ["countries" => $countries ] ,
         ]);
 
-    } catch(\Exception $e){
-        return response()->json([
-            "status" => false,
-            "message" => "Something went wrong",
-            "data" => null,
-        ]);
-    }
-
     }
 
     /**
@@ -43,12 +37,13 @@ class RegionController extends Controller
      */
     public function store(Request $request)
     {
-        try{
+        
         $validator = Validator::make($request->all(),[
             'description' => ['required', 'max:300'],
-            'country_id' => ['nullable', Rule::exists('regions', 'id')],
-            'name' => ['required', Rule::unique('regions', 'name')->where(fn ($query) => $query->where('region_id', $request->country_id))],
+            'country_id' => ['nullable', Rule::exists('regions', 'id')->where(fn ($query) => $query->where('deleted_at',  null))],
+            'name' => ['required', Rule::unique('regions', 'name')->where(fn ($query) => $query->where('region_id', $request->country_id)->orWhere('id', $request->country_id))],
             'photos' => ['required', 'array'],
+            'photos.*' => ['required', 'image'],
         ]);
 
 
@@ -68,23 +63,25 @@ class RegionController extends Controller
         ]);
 
      if($request->country_id){
-        $country = Region::find($request->country_id)->name;
-        $city = $request->name;
+        $country = Region::find($request->country_id);
      }
      else{
-        $country = $city = $request->name;
+        $country = $region;
      }
 
      foreach($request->photos as $photo){
-        $extension = $photo->getClientOriginalExtension();
-        $add = Str::uuid()->toString();
-        $name = $add . '.' . $extension;
-       $path = $photo->storeAs('Regions', $country . '/' . $city . '/' . $name);
-        Photo::create([
-            'photoable_type' => 'App\Models\Region',
-            'photoable_id' => $region->id,
-            'path' => $path,
+        
+       $parent = Folder::firstOrCreate([
+            "name" => $country->name,
+            "folder_id" => 1,
         ]);
+
+       $folder = Folder::firstOrCreate([
+            "name" => $region->name,
+            "folder_id" => $parent->id,
+        ]);
+
+        $this->save_image($photo, 'Regions',  $country->name . '/' . $region->name, $folder->id);
      }
 
      return response()->json([
@@ -92,19 +89,6 @@ class RegionController extends Controller
         "message" => "Region is added successfully",
         "data" => null,
      ]);
-
-
-
-    } catch(\Exception $e){
-        return response()->json([
-            "status" => false,
-            "message" => "Something went wrong",
-            "data" => null,
-        ]);
-    }
-
-
-
         
     }
 
@@ -113,8 +97,10 @@ class RegionController extends Controller
      */
     public function show(Region $region)
     {
-        try{
-        $region->load('photos:id,path,photoable_id', 'cities:id,name,region_id', 'country:id,name,region_id');
+       
+        $region->load('cities:id,name,region_id', 'country:id,name,region_id');
+
+       $region->images = Folder::where('name', $region->name)->where('folder_id', '!=', 1)->first()->images;
 
 
         return response()->json([
@@ -123,15 +109,6 @@ class RegionController extends Controller
             "data" => ['region'=>$region],
         ]);
 
-    } catch(\Exception $e){
-        return response()->json([
-            "status" => false,
-            "message" => "Something went wrong",
-            "data" => null,
-        ]);
-
-    }
-
     }
 
     /**
@@ -139,9 +116,9 @@ class RegionController extends Controller
      */
     public function update(Request $request, String $id)
     {
-        try{
+        
             $messages = [
-                'deleted_photos.*.exists' => 'Deleted photo must be for this region',
+                'deleted_photos.*.exists' => 'You are deleting a photo that doesnt exist',
                 'deleted_photos.*.required' => 'You must add the deleted photos if there are any',
                 'added_photos.*.image' => 'The inserted files must all be images',
                 'added_photos.*.required' => 'You must add the inserted photos if the exist',
@@ -161,7 +138,7 @@ class RegionController extends Controller
             'name' => ['required', Rule::unique('regions', 'name')->where(fn ($query) => $query->where('id', '!=', $region->id)->where('region_id', ($region->country()->withTrashed()->exists() ? $region->country()->withTrashed()->first()->id : null)))],
             'description' => ['required', 'max:200'],
             'deleted_photos' => ['nullable', 'array'],
-            'deleted_photos.*' => ['required', Rule::exists('photos', 'id')->where(fn ($query) => $query->where('photoable_id',  $region->id))],
+            'deleted_photos.*' => ['required', Rule::exists('photos', 'id')],
             'added_photos' => ['nullable', 'array'],
             'added_photos.*' => ['required', 'image'],
         ], $messages);
@@ -175,47 +152,50 @@ class RegionController extends Controller
             ]);
         }
 
+        if($region->region_id){
+
+            $country = Region::withTrashed()->find($region->region_id);
+         }
+         else{
+
+            $country = $region;
+         }
+
+        $old_region = $region->name;
+
        $region->update([
             'name' => $request->name,
             'description' => $request->description,
         ]);
 
-        if($request->deleted_photos){
+        Storage::move('Regions/' . $country->name . '/' . $old_region, 'Regions/' . $country->name . '/' . $region->name);
 
+        Folder::where('name', $old_region)->where('folder_id', '!=', null)->first()->update([
+            'name' => $region->name,
+        ]);
+
+        if($request->deleted_photos){
+    
         foreach($request->deleted_photos as $id){
-            $photo = Photo::find($id);
-            $path = $photo->path;
-            Storage::delete($path);
-            $photo->delete();
+           $this->delete_image($id);
         }
     }
 
-        if($region->region_id){
-
-            $country = Region::withTrashed()->find($region->region_id)->name;
-            $city = $request->name;
-         }
-         else{
-
-            $country = $city = $request->name;
-         }
          if($request->added_photos){
 
         foreach($request->added_photos as $photo){
 
-            $extension = $photo->getClientOriginalExtension();
-
-            $add = Str::uuid()->toString();
-
-            $name = $add . '.' . $extension;
-
-           $path = $photo->storeAs('Regions', $country . '/' . $city . '/' . $name);
-
-            Photo::create([
-                'photoable_type' => 'App\Models\Region',
-                'photoable_id' => $region->id,
-                'path' => $path,
+            $parent = Folder::firstOrCreate([
+                "name" => $country->name,
+                "folder_id" => 1,
             ]);
+    
+           $folder = Folder::firstOrCreate([
+                "name" => $region->name,
+                "folder_id" => $parent->id,
+            ]);
+
+           $this->save_image($photo, 'Regions', $country->name . '/' . $region->name, $folder->id);
         }
     }
 
@@ -225,15 +205,6 @@ class RegionController extends Controller
             "data" => null,
         ]);
 
-    } catch(\Exception $e){
-
-        return response()->json([
-            "status" => false,
-            "message" => "Something went wrong",
-            "data" => null,
-        ]);
-
-    }
     }
 
     /**
@@ -241,7 +212,6 @@ class RegionController extends Controller
      */
     public function destroy(String $id)
     {
-        try{
 
             $region = Region::withTrashed()->find($id);
 
@@ -263,14 +233,24 @@ class RegionController extends Controller
         }
 
            $country = null;
+
+           $country_name = null;
             
             if($region->country()->withTrashed()->exists())
-             $country = $region->country()->withTrashed()->first()->name;
+             $country = $region->country()->withTrashed()->first();
 
-            Storage::deleteDirectory('Regions/' . $country . '/' . $region->name);
+             if($country)
+             $country_name = $country->name;
 
-            $region->photos()->delete();
+            Storage::deleteDirectory('Regions/' . $country_name . '/' . $region->name);
 
+            if($country){
+                $father = Folder::where('folder_id', 1)->where('name', $country->name)->first();
+            Folder::where('name', $region->name)->where('folder_id', $father->id)->delete();
+            } else{
+                Folder::where('folder_id', 1)->where('name', $region->name)->first()->delete();
+            }
+        
             $region->forceDelete();
 
             return response()->json([
@@ -279,19 +259,9 @@ class RegionController extends Controller
                 'data' => null,
             ]);
 
-        } catch(\Exception $e){
-            return response()->json([
-                "status" => false,
-                "message" => "Something went wrong",
-                "data" => null,
-            ]);
-        }
-
     }
 
     public function archive(Region $region){
-
-        try{
 
         $string = null;
 
@@ -313,18 +283,9 @@ class RegionController extends Controller
 
         ]);
 
-    } catch(\Exception $e){
-            return response()->json([
-                "status" => false,
-                "message" => "Something went wrong",
-                "data" => null,
-            ]);
-        }
 }
 
     public function index_archived(){
-
-        try{
 
         $regions = Region::onlyTrashed()->select('id', 'name')->get();
 
@@ -334,20 +295,9 @@ class RegionController extends Controller
             "data" => ["regions" => $regions],
         ]);
 
-        } catch(\Exception $e){
-
-            return response()->json([
-            "status" => false,
-            "message" => "Something went wrong",
-            "data" => null,
-        ]);
-    }
-
     }
 
     public function show_archived(String $id){
-
-        try{
 
         $region = Region::withTrashed()->where('id', $id)->first();
 
@@ -366,7 +316,8 @@ class RegionController extends Controller
             ]);
         }
 
-       $region->load('photos:id,path,photoable_id');
+      
+       $region->images = Folder::where('name', $region->name)->where('folder_id', '!=', 1)->first()->images;
        
        $region->cities = $region->cities()->onlyTrashed()->select('id','name')->get();
 
@@ -381,19 +332,9 @@ class RegionController extends Controller
 
         ]);
 
-        } catch(\Exception $e){
-
-            return response()->json([
-                "status" => false,
-                "message" => "Something went wrong",
-                "data" => null,
-            ]);
-        }
         }
 
     public function restore_archived(String $id){
-
-        try{
 
          $region = Region::onlyTrashed()->find($id);
 
@@ -423,13 +364,17 @@ class RegionController extends Controller
             "data" => null,
          ]);
 
-        } catch(\Exception $e){
-            return response()->json([
-                "status" => false,
-                "message" => "Something went wrong",
-                "data" => null,
-            ]);
         }
+
+        public function cities(){
+
+            $cities = Region::where('region_id', '!=', null)->select('id','name')->get();
+
+            return response()->json([
+                "status" => true,
+                "message" => "All cities",
+                "data" => ["cities" => $cities],
+            ]);
 
         }
     }

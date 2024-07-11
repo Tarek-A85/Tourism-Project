@@ -9,7 +9,9 @@ use Illuminate\Http\Request;
 use  App\Http\Middleware\CanChangePasswordMiddleware;
 use  App\Http\Middleware\CheckEmailMiddleware;
 use  App\Http\Middleware\CheckAdminMiddleware;
+use Illuminate\Http\Exceptions\HttpResponseException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+
 use App\Http\Middleware\UserMiddleware;
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -29,6 +31,8 @@ return Application::configure(basePath: dirname(__DIR__))
     })
     ->withExceptions(function (Exceptions $exceptions) {
 
+       
+
         $exceptions->render(function (AuthenticationException $e, Request $request){
             if ($request->wantsJson()) {
                 return response()->json([
@@ -44,6 +48,27 @@ return Application::configure(basePath: dirname(__DIR__))
                 return response()->json([
                     "status" => false,
                     "message" => "There is no object like that",
+                    "data" => null,
+                ]);
+            }
+            });
+
+        $exceptions->render(function (ThrottleRequestsException $e, Request $request){
+            if ($request->wantsJson()) {
+                return response()->json([
+                    "status" => false,
+                    "message" => "Too many attempts, please try after 15 minutes",
+                    "data" => null,
+                ]);
+            }
+            });
+
+
+        $exceptions->render(function (Exception $e, Request $request){
+            if ($request->wantsJson()) {
+                return response()->json([
+                    "status" => false,
+                    "message" => "Something went wrong",
                     "data" => null,
                 ]);
             }

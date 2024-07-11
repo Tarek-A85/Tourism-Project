@@ -11,8 +11,7 @@ class Photo extends Model
 
     protected $guarded = ['id'];
 
-    public function photoable()
-    {
-        return $this->morphto();
+    public function folder(){
+        return $this->belongsTo(Folder::class, 'folder_id');
     }
 }

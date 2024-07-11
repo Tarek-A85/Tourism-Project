@@ -27,33 +27,27 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         RateLimiter::for('forgot_password_code', function (Request $request) {
-            return Limit::perMinutes(15,1)->by($request->user()?->id ?: $request->ip())->response(function(){
-                return response()->json([
-                    "status" => false,
-                    "message" => "Too many attempts, please try after 15 minutes",
-                    "data" => null,
-                ]);
-            });
+             return Limit::perMinutes(15,1)->by($request->user()?->id ?: $request->ip());//->response(function(){
+            //     return response()->json([
+            //         "status" => false,
+            //         "message" => "Too many attempts, please try after 15 minutes",
+            //         "data" => null,
+            //     ]);
+            // });
         });
 
         RateLimiter::for('resend_verification_code', function (Request $request) {
-            return Limit::perMinutes(15,1)->by($request->user()?->id ?: $request->ip())->response(function(){
-                return response()->json([
-                    "status" => false,
-                    "message" => "Too many attempts, please try after 15 minutes",
-                    "data" => null,
-                ]);
-            });
+             return Limit::perMinutes(15,1)->by($request->user()?->id ?: $request->ip());//->response(function(){
+            //     return response()->json([
+            //         "status" => false,
+            //         "message" => "Too many attempts, please try after 15 minutes",
+            //         "data" => null,
+            //     ]);
+            // });
         });
 
         RateLimiter::for('resetting_code', function (Request $request) {
-            return Limit::perMinutes(15,1)->by($request->user()?->id ?: $request->ip())->response(function(){
-                return response()->json([
-                    "status" => false,
-                    "message" => "Too many attempts, please try after 15 minutes",
-                    "data" => null,
-                ]);
-            });
-        });
+             return Limit::perMinutes(15,1)->by($request->user()?->id ?: $request->ip());
+       });
     }
 }
