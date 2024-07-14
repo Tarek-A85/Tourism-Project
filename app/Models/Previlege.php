@@ -11,12 +11,14 @@ class Previlege extends Model
 
     protected $fillable = ['name'];
 
-  
+    protected $hidden = ['pivot'];
 
     public function hotels(){
 
         return $this->belongsToMany(Hotel::class);
     }
+
+   
 
     
     

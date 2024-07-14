@@ -10,7 +10,6 @@ class Region extends Model
     use HasFactory, SoftDeletes;
 
     protected $fillable = ['name', 'description', 'region_id'];
-
    
 
     public function cities(){
@@ -22,9 +21,6 @@ class Region extends Model
 
         return $this->belongsTo(Region::class, 'region_id');
     }
-
-    
-        
 
     public function hotels(){
 
