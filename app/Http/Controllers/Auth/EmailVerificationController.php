@@ -8,88 +8,52 @@ use Illuminate\Support\Facades\Validator;
 use Ichtrojan\Otp\Otp;
 use App\Notifications\SendCodeNotification;
 use Exception;
+use App\Traits\GeneralTrait;
 class EmailVerificationController extends Controller
 {
+  use GeneralTrait;
+
     public function verification_code_validation( Request $request ){
-      try{
 
         $validator = Validator::make($request->all(), [
            'code' => 'required',
         ]);
 
         if($validator->fails()){
-          return response()->json([
-            "status" => false,
-            "message" => $validator->errors()->first(),
-            "data" => null,
-          ]);
+          return $this->fail($validator->errors()->first());
         }
-        if(auth()->user()->email_verified_at != null){
 
-          return response()->json([
-            "status" => false,
-            "message" => "You are already verified",
-            "data" => null,
-          ]);
-          
+        if(auth()->user()->email_verified_at != null){
+          return $this->fail("You are already verified");
         }
 
         $otp = (new Otp)->validate(auth()->user()->email, $request->code);
 
         if(!$otp->status){
-            return response()->json([
-                "status" => false,
-                "message" => $otp->message,
-                "data" => null,
-            ]);
+            return $this->fail($otp->message);
         }
         else{
           auth()->user()->update([
             "email_verified_at" => now(),
           ]);
 
-          return response()->json([
-            "status" => true,
-            "message" => "Your email is verified successfully",
-            "data" => null,
-          ]);
+          return $this->success("Your email is verified successfully");
 
         }
 
-    } catch(\Exception $e){
-
-      return response()->json([
-        "status" => false,
-        "message" => "Something went wrong",
-        "data" => null,
-      ]);
-    }
 
   }
   
 
     public function resend_verification_code(){
 
-      
-
       if(auth()->user()->email_verified_at != null){
-        return response()->json([
-          "status" => false,
-          "message" => "You are already verified",
-          "data" => null,
-        ]);
+        return $this->fail("You are already verified");
       }
 
         auth()->user()->notify(new SendCodeNotification('Please verify your email using the code below'));
 
-        return response()->json([
-            "status" => true,
-            "message" => "A verification code is sent to your email",
-            "data" => null,
-        ]);
-
-   
-
+        return $this->success("A verification code is sent to your email");
 
   }
    

@@ -10,54 +10,33 @@ use Illuminate\Support\Str;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rules\Password;
+use App\Traits\GeneralTrait;
 class ResetPasswordController extends Controller
 {
-    public function send_code(){
+    use GeneralTrait;
 
-        try{
+    public function send_code(){
 
         auth()->user()->notify(new SendCodeNotification ("Please use the code below to allow you to change the password") );
 
-        return response()->json([
-            "status" => true,
-            "message" => "A code is sent to your email, use it to allow you to change the password",
-            "data" => null,
-        ]);
-
-    } catch(\Exception $e){
-        
-        return response()->json([
-          "status" => false,
-          "message" => "Something went wrong",
-          "data" => null,
-        ]);
-  
-      }
+        return $this->success("A code is sent to your email, use it to allow you to change the password");
 
     }
 
     public function validate_code(Request $request){
 
-        try{
             $validator = Validator::make($request->all(), [
                 'code' => 'required',
              ]);
      
              if($validator->fails()){
-               return response()->json([
-                 "status" => false,
-                 "message" => $validator->errors()->first(),
-                 "data" => null,
-               ]);
+            return $this->fail($validator->errors()->first());
              }
+
         $otp = (new Otp)->validate(auth()->user()->email, $request->code);
 
         if(!$otp->status){
-            return response()->json([
-                "status" => false,
-                "message" => $otp->message,
-                "data" => null,
-            ]);
+            return $this->fail( $otp->message);
         }
      
             $reset_token = Str::random(10);
@@ -67,47 +46,24 @@ class ResetPasswordController extends Controller
                 'token' => $reset_token,
             ]);
 
-            return response()->json([
-                "status" => true,
-                "message" => "you can reset your password now",
-                "data" => ["reset_token" => $reset_token],
-            ]);
-
-    } catch(\Exception $e){
-
-        return response()->json([
-          "status" => false,
-          "message" => "Something went wrong",
-          "data" => null,
-        ]);
-  
-      }
+        return $this->success("you can reset your password now",  ["reset_token" => $reset_token]);
 
     }
 
     public function reset_password(Request $request){
 
-        try{
         $validator = Validator::make($request->all(),[
             'new_password' => ['required', 'confirmed', Password::min(8)],
         ]);
 
         if($validator->fails()){
-            return response()->json([
-                "status" => false,
-                "message" => $validator->errors()->first(),
-                "data" => null,
-            ]);
+            return $this->fail($validator->errors()->first());
         }
 
         $check = DB::table('password_reset_tokens')->where('email', auth()->user()->email)->first();
 
         if(!$check || $request->reset_token == null || $check->token != $request->reset_token){
-            return response()->json([
-                "status" => false,
-                "message" => "you are not authorized to reset your password",
-                "data" => null,
-            ]);
+            return $this->fail("you are not authorized to reset your password");
         }
 
         auth()->user()->update([
@@ -118,22 +74,7 @@ class ResetPasswordController extends Controller
 
         auth()->user()->tokens()->delete();
 
-        return response()->json([
-            "status" => true,
-            "message" => "your password is changed successfully",
-            "data" => null,
-
-        ]);
-
-    } catch(\Exception $e){
-
-        return response()->json([
-          "status" => false,
-          "message" => "Something went wrong",
-          "data" => null,
-        ]);
-      }
-
+        return $this->success("your password is changed successfully");
 
     }
     

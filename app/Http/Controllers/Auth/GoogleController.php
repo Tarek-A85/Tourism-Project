@@ -8,11 +8,12 @@ use Illuminate\Support\Facades\Validator;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
+use App\Traits\GeneralTrait;
 class GoogleController extends Controller
 {
-    public function sign_up(Request $request){
+  use GeneralTrait;
 
-        try{
+    public function sign_up(Request $request){
 
         $validator = Validator::make($request->all(), [
             'name' => 'required',
@@ -21,11 +22,7 @@ class GoogleController extends Controller
         ]);
 
         if($validator->fails()){
-            return response()->json([
-              "status" => false,
-              "message" => $validator->errors()->first(),
-              "data" => null,
-            ]);
+            return $this->fail($validator->errors()->first());
           }
 
         $user = User::create([
@@ -35,29 +32,13 @@ class GoogleController extends Controller
             'email_verified_at' => now(),
         ]);
 
-       
-
         $token = $user->createToken('google_token')->plainTextToken;
 
-        return response()->json([
-            "statue" => true,
-            "message" => "Your are registered successfully",
-            "data" => ["token" => $token],
-        ]);
-
-    } catch(\Exception $e){
-
-        return response()->json([
-          "status" => false,
-          "message" => "Something went wrong",
-          "data" => null,
-        ]);
-      }
+        return $this->success("Your are registered successfully", ["token" => $token]);
 
     }
 
     public function sign_in(Request $request){
-        try{
 
         $validator = Validator::make($request->all(), [
             'email' => 'required',
@@ -66,11 +47,7 @@ class GoogleController extends Controller
         ]);
 
         if($validator->fails()){
-            return response()->json([
-              "status" => false,
-              "message" => $validator->errors()->first(),
-              "data" => null,
-            ]);
+            return $this->fail($validator->errors()->first());
           }
 
           $user = User::where('email', $request->email)->where('google_id', $request->google_id)->where('is_admin',$request->is_admin)->first();
@@ -81,30 +58,12 @@ class GoogleController extends Controller
         $rule= 'user';
 
           if(!$user){
-            return response()->json([
-              "status" => false,
-              "message" => "There is no $rule with these credentials",
-              "data" => null,
-          ]);
+             return $this->fail("There is no $rule with these credentials");
           }
 
-            $token = $user->createToken('SignInToken')->plainTextToken;
+          $token = $user->createToken('SignInToken')->plainTextToken;
 
-            return response()->json([
-                "status" => true,
-                "message" => "You are logged in successfully",
-                "data" => ["token" => $token],
-
-            ]);
+           return $this->success( "You are logged in successfully", ["token" => $token]);
        
-
-    } catch(\Exception $e){
-
-        return response()->json([
-          "status" => false,
-          "message" => "Something went wrong",
-          "data" => null,
-        ]);
-      }
-}
+   }
 }
