@@ -10,7 +10,7 @@ class Company extends Model
 {
     use HasFactory, SoftDeletes;
 
-    protected $fillable = ['name'];
+    protected $fillable = ['name','description'];
 
     public function flights()
     {
@@ -30,5 +30,10 @@ class Company extends Model
     public function reviews()
     {
         return $this->morphMany(Review::class,'reviewable');
+    }
+
+    public function packages()
+    {
+        return $this->belongsToMany(Package::class);
     }
 }
