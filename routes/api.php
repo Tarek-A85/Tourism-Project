@@ -65,6 +65,9 @@ Route::middleware(['auth:sanctum'])->group(function () {
             Route::get('regions/restore/archived/{id}', [RegionController::class, 'restore_archived']);
             Route::get('regions/cities', [RegionController::class, 'cities']);
             Route::apiResource('regions', RegionController::class)->only(['store', 'update', 'destroy']);
+            Route::delete('hotels/archive/{hotel}', [HotelController::class, 'archive']);
+            Route::get('hotels/archived', [HotelController::class, 'index_archived']);
+            Route::get('hotels/restore/archived/{id}', [HotelController::class, 'restore_archived']);
             Route::apiResource('hotels', HotelController::class)->only(['store', 'update', 'destroy']);
         });
       

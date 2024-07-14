@@ -12,11 +12,9 @@ class Hotel extends Model
 
     protected $fillable = ['name', 'region_id', 'stars', 'description'];
 
-   
-
     public function region(){
 
-        return $this->belongsTo(Region::class)->with('country:id,name');
+        return $this->belongsTo(Region::class, 'region_id')->withTrashed()->with('country:id,name,deleted_at');
     }
 
     public function previleges(){
@@ -25,9 +23,9 @@ class Hotel extends Model
     }
 
    
-    public function room()
+    public function room_info()
     {
-        return $this->hasOne(Room::class);
+        return $this->hasOne(Room::class)->withTrashed();
     }
 
     public function favorite()
@@ -35,11 +33,6 @@ class Hotel extends Model
         return $this->morphMany(Favorite::class,'favorable');
     }
 
-    public function photos()
-    {
-        return $this->morphMany(photo::class, 'photoable');
-    }
-    
     public function reviews()
     {
         return $this->morphMany(Review::class,'reviewable');
@@ -48,5 +41,14 @@ class Hotel extends Model
     public function package_areas(){
 
         return $this->morphMany(PackageArea::class, 'visitable');
+    }
+
+    public function getImagesAttribute(){
+
+        $country = Folder::where('folder_id', 4)->where('name', $this->region->country->name)->first();
+
+        $city = Folder::where('folder_id', $country->id)->where('name', $this->region->name)->first();
+
+      return  Folder::where('folder_id', $city->id)->where('name', $this->name)->first()->images;
     }
 }

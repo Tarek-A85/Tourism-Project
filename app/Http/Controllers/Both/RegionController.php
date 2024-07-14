@@ -24,11 +24,7 @@ class RegionController extends Controller
         
         $countries = Region::where('region_id', null)->select('id', 'name')->get();
 
-        return response()->json([
-            "status" => true,
-            "message" => "All countries",
-            "data" => ["countries" => $countries ] ,
-        ]);
+        return $this->success("All countries", ["countries" => $countries]);
 
     }
 
@@ -46,16 +42,10 @@ class RegionController extends Controller
             'photos.*' => ['required', 'image'],
         ]);
 
-
         if($validator->fails()){
-            return response()->json([
-                "status" => false,
-                "message" => $validator->errors()->first(),
-                "data" => null,
-            ]);
+        return $this->fail($validator->errors()->first());
         }
 
-       
        $region = Region::create([
             'name' => $request->name,
             'description' => $request->description,
@@ -84,11 +74,7 @@ class RegionController extends Controller
         $this->save_image($photo, 'Regions',  $country->name . '/' . $region->name, $folder->id);
      }
 
-     return response()->json([
-        "status" => true,
-        "message" => "Region is added successfully",
-        "data" => null,
-     ]);
+     return $this->success("Region is added successfully");
         
     }
 
@@ -100,14 +86,16 @@ class RegionController extends Controller
        
         $region->load('cities:id,name,region_id', 'country:id,name,region_id');
 
-       $region->images = Folder::where('name', $region->name)->where('folder_id', '!=', 1)->first()->images;
+        if($region->country){
+            $father = Folder::where('name', $region->country->name)->where('folder_id', 1)->first();
+        }
+        else{
+            $father = Folder::where('name', $region->name)->where('folder_id', 1)->first();
+        }
 
+       $region->images = Folder::where('folder_id', $father->id)->where('name', $region->name)->first()->images;
 
-        return response()->json([
-            "status" => true,
-            "message" => "Region info",
-            "data" => ['region'=>$region],
-        ]);
+       return $this->success("Region info", ['region' => $region]);
 
     }
 
@@ -124,15 +112,7 @@ class RegionController extends Controller
                 'added_photos.*.required' => 'You must add the inserted photos if the exist',
             ];
 
-        $region = Region::withTrashed()->find($id);
-
-        if(!$region){
-            return response()->json([
-                "status" => false,
-                "message" => "There is no object like that",
-                "data" => null,
-            ]);
-        }
+        $region = Region::withTrashed()->findOrFail($id);
 
         $validator = Validator::make($request->all(),[
             'name' => ['required', Rule::unique('regions', 'name')->where(fn ($query) => $query->where('id', '!=', $region->id)->where('region_id', ($region->country()->withTrashed()->exists() ? $region->country()->withTrashed()->first()->id : null)))],
@@ -145,11 +125,7 @@ class RegionController extends Controller
 
 
         if($validator->fails()){
-            return response()->json([
-                "status" => false,
-                "message" => $validator->errors()->first(),
-                "data" => null,
-            ]);
+            return $this->fail($validator->errors()->first());
         }
 
         if($region->region_id){
@@ -199,11 +175,7 @@ class RegionController extends Controller
         }
     }
 
-        return response()->json([
-            "status" => true,
-            "message" => "Region is updated successfully",
-            "data" => null,
-        ]);
+    return $this->success("Region is updated successfully");
 
     }
 
@@ -213,23 +185,10 @@ class RegionController extends Controller
     public function destroy(String $id)
     {
 
-            $region = Region::withTrashed()->find($id);
-
-            if(!$region){
-
-                return response()->json([
-                    "status" => false,
-                    "message" => "There is no object like that",
-                    "data" => null,
-                ]);
-            }
+            $region = Region::withTrashed()->findOrFail($id);
 
         if($region->cities()->withTrashed()->exists()|| $region->hotels()->withTrashed()->exists() || $region->package_areas()->exists() ){
-            return response()->json([
-                "status" => false,
-                "message" => "You can't permenentaly delete this region, it's used at some places",
-                "data" => null,
-            ]);
+            return $this->fail("You can't permenentaly delete this region, it's used at some places");
         }
 
            $country = null;
@@ -253,11 +212,7 @@ class RegionController extends Controller
         
             $region->forceDelete();
 
-            return response()->json([
-                'status' => true,
-                'message' => "Region is permanently deleted successfully",
-                'data' => null,
-            ]);
+            return $this->success("Region is permanently deleted successfully");
 
     }
 
@@ -276,12 +231,7 @@ class RegionController extends Controller
 
         $region->delete();
 
-        return response()->json([
-            "status" => false,
-            "message" => "Region" . $string . " is temporariy deleted successfully",
-            "data" => null,
-
-        ]);
+        return $this->success("Region" . $string . " is temporariy deleted successfully");
 
 }
 
@@ -289,63 +239,34 @@ class RegionController extends Controller
 
         $regions = Region::onlyTrashed()->select('id', 'name')->get();
 
-        return response()->json([
-            "status" => true,
-            "message" => "Archived regions",
-            "data" => ["regions" => $regions],
-        ]);
+        return $this->success("Archived regions", ["regions" => $regions]);
 
     }
 
     public function show_archived(String $id){
 
-        $region = Region::withTrashed()->where('id', $id)->first();
+        $region = Region::onlyTrashed()->findOrFail($id);
 
-        if(!$region){
-            return response()->json([
-                "status" => false,
-                "message" => "There is no object like that",
-                "data" => null,
-            ]);
+        if($region->country()->withTrashed()->exists()){
+            $father = Folder::where('name', $region->country()->withTrashed()->first()->name)->where('folder_id', 1)->first();
         }
-        if($region->deleted_at == null){
-            return response()->json([
-                "status" => false,
-                "message" => "The region isn't in the archive",
-                "data" => null,
-            ]);
+        else{
+            $father = Folder::where('name', $region->name)->where('folder_id', 1)->first();
         }
 
-      
-       $region->images = Folder::where('name', $region->name)->where('folder_id', '!=', 1)->first()->images;
+       $region->images = Folder::where('name', $region->name)->where('folder_id', $father->id)->first()->images;
        
        $region->cities = $region->cities()->onlyTrashed()->select('id','name')->get();
 
        $region->country = $region->country()->withTrashed()->select('id', 'name')->get();
 
-       
+        return $this->success("Archived region info", ["region" => $region]);
 
-        return response()->json([
-            "status" => true,
-            "message" => "Archived region info",
-            "data" => ["region" => $region],
-
-        ]);
-
-        }
+    }
 
     public function restore_archived(String $id){
 
-         $region = Region::onlyTrashed()->find($id);
-
-         if(!$region){
-
-            return response()->json([
-                "status" => false,
-                "message" => "There is no object like that",
-                "data" => null,
-            ]);
-         }
+         $region = Region::onlyTrashed()->findOrFail($id);
 
          $string = null;
 
@@ -358,23 +279,15 @@ class RegionController extends Controller
 
          $region->restore();
 
-         return response()->json([
-            "status" => true,
-            "message" => "Region" . $string . " restored",
-            "data" => null,
-         ]);
+        return $this->success("Region" . $string . " restored");
 
-        }
+    }
 
         public function cities(){
 
             $cities = Region::where('region_id', '!=', null)->select('id','name')->get();
 
-            return response()->json([
-                "status" => true,
-                "message" => "All cities",
-                "data" => ["cities" => $cities],
-            ]);
+            return $this->success("All cities",  ["cities" => $cities]);
 
         }
     }
