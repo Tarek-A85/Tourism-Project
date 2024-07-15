@@ -21,5 +21,13 @@ class DatabaseSeeder extends Seeder
         $this->call(RegionSeeder::class);
         
         $this->call(HotelSeeder::class);
+        
+        $this->call(CompanySeeder::class);
+
+        $this->call(PackageTypeSeeder::class);
+
+        $this->call(PackageSeeder::class);
+
+
     }
 }

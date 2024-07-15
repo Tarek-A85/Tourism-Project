@@ -16,97 +16,56 @@ class WalletController extends Controller
 {
     public function create(Request $request)
     {
-        try {
-            $validator = Validator::make($request->all(), [
-                'password' => ['required', 'confirmed', Password::min(8)]
-            ]);
+        
+        $validator = Validator::make($request->all(), [
+            'password' => ['required', 'confirmed', Password::min(8)]
+        ]);
 
-            if ($validator->fails()) {
-                return response()->json([
-                    'status' => false,
-                    'message' => $validator->errors()->first(),
-                    'data' => null
-                ], 401);
-            }
-
-            if(auth()->user()->wallet)
-            {
-                return response()->json([
-                    'status' => false,
-                    'message' => 'you already has wallet',
-                    'data' => null
-                ]);
-            }
-
-            Wallet::create([
-                'user_id' => auth()->id(),
-                'balance' => 0,
-                'password' => Hash::make($request->password)
-            ]);
-
-            return response()->json([
-                'status' => true,
-                'message' => 'your wallet created successfuly',
-                'data' => null
-            ]);
-        } catch (\Exception $e) {
-            return response()->json([
-                "status" => false,
-                "message" => "Something went wrong",
-                "data" => null,
-            ]);
+        if ($validator->fails()) {
+            return $this->fail($validator->errors()->first());
         }
+
+        if(auth()->user()->wallet)
+        {
+            return $this->fail('you already has wallet');
+        }
+
+        Wallet::create([
+            'user_id' => auth()->id(),
+            'balance' => 0,
+            'password' => Hash::make($request->password)
+        ]);
+
+        return $this->success('your wallet created successfuly');
     }
 
     public function restePassword(Request $request)
     {
-        try {
+        $validator = Validator::make($request->all(), [
+            'password' => ['required', 'confirmed', Password::min(8)]
+        ]);
 
-            $validator = Validator::make($request->all(), [
-                'password' => ['required', 'confirmed', Password::min(8)]
-            ]);
-
-            if ($validator->fails()) {
-                return response()->json([
-                    'status' => false,
-                    'message' => $validator->errors()->first(),
-                    'data' => null
-                ], 401);
-            }
-
-            $walletOwner = auth()->user();
-
-            $check = DB::table('password_reset_tokens')
-                ->where('email', $walletOwner->email)->first();
-
-            if (!$check || $request->reset_token == null || $check->token != $request->reset_token) {
-                return response()->json([
-                    "status" => false,
-                    "message" => "you are not authorized to reset your password",
-                    "data" => null,
-                ],403);
-            }
-
-            DB::table('password_reset_tokens')
-            ->where('email', $walletOwner->email)->delete();
-
-            $walletOwner->wallet->update([
-                'password' => Hash::make($request->password)
-            ]);
-
-            return response()->json([
-                "status" => true,
-                "message" => "your wallet password is changed successfully",
-                "data" => null,
-
-            ]);
-        } 
-        catch (\Exception $e) {
-            return response()->json([
-                "status" => false,
-                "message" => "Something went wrong",
-                "data" => null,
-            ]);
+        if ($validator->fails()) {
+            return $this->fail($validator->errors()->first());
         }
+
+        $walletOwner = auth()->user();
+
+        $check = DB::table('password_reset_tokens')
+            ->where('email', $walletOwner->email)->first();
+
+        if (!$check || $request->reset_token == null || $check->token != $request->reset_token) {
+            return $this->fail("you are not authorized to reset your password");
+        }
+
+        DB::table('password_reset_tokens')
+        ->where('email', $walletOwner->email)->delete();
+
+        $walletOwner->wallet->update([
+            'password' => Hash::make($request->password)
+        ]);
+
+        return $this->success("your wallet password is changed successfully");
+
     }
 }

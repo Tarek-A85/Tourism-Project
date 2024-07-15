@@ -13,14 +13,9 @@ use App\Http\Controllers\Auth\{
 use App\Http\Controllers\Both\{
     RegionController,
     HotelController,
+    PackageController
 };
-
 use App\Http\Controllers\User\WalletController;
-
-
-    
-
-
 
 Route::post('google/signup', [GoogleController::class, 'sign_up'])->name('google_sign_up');
 Route::post('google/signin', [GoogleController::class, 'sign_in'])->name('google_sign_in');
@@ -69,11 +64,17 @@ Route::middleware(['auth:sanctum'])->group(function () {
             Route::get('hotels/archived', [HotelController::class, 'index_archived']);
             Route::get('hotels/restore/archived/{id}', [HotelController::class, 'restore_archived']);
             Route::apiResource('hotels', HotelController::class)->only(['store', 'update', 'destroy']);
+
+            Route::apiResource('package',PackageController::class)->only(['store','update','destroy']);
+            Route::delete('package/archive/{package}',[PackageController::class,'archive']);
+            Route::get('package/archived',[PackageController::class,'index_archived']);
+            Route::get('package/restore/archived/{id}',[PackageController::class,'restore_archived']);
         });
       
         Route::delete('/logout',[AuthenticatedController::class,'logout']);
         Route::apiResource('regions', RegionController::class)->only(['index', 'show']);
         Route::apiResource('hotels', HotelController::class)->only(['index', 'show']);
+        Route::apiResource('package',PackageController::class)->only(['index','show']);
      });
    
 });

@@ -18,6 +18,7 @@ return new class extends Migration
             $table->decimal('adult_price',12,2);
             $table->decimal('child_price', 12, 2);
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 

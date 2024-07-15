@@ -5,6 +5,7 @@ namespace App\Providers;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Foundation\AliasLoader;
 use Illuminate\Cache\RateLimiting\Limit;
+use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Http\Request;
 
@@ -26,6 +27,12 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        Relation::MorphMap([
+            'Hotel' => 'App\Models\Hotel',
+            'Region' => 'App\Models\Region',
+            'Package' => 'App\Models\Package'
+        ]);
+        
         RateLimiter::for('forgot_password_code', function (Request $request) {
              return Limit::perMinutes(15,1)->by($request->user()?->id ?: $request->ip());//->response(function(){
             //     return response()->json([

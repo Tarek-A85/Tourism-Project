@@ -29,7 +29,7 @@ class Flight extends Model
 
     public function trip_detail()
     {
-        return $this->morphMany(TripDetail::class,'detailable','tripdetails');
+        return $this->morphMany(TripDetail::class,'detailable');
     }
 
 }
