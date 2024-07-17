@@ -68,7 +68,7 @@ return Application::configure(basePath: dirname(__DIR__))
             if ($request->wantsJson()) {
                 return response()->json([
                     "status" => false,
-                    "message" => $e->getMessage(),
+                    "message" => 'Something went wrong',
                     "data" => null,
                 ]);
             }

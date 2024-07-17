@@ -18,7 +18,7 @@ class Package extends Model
     {
         $period = 0;
         foreach ($this->package_areas as $area) {
-            if ($area['visitable']['region_id'] != '' && $area['visitable_type']=='Region') {
+            if ($area['visitable']['region_id'] == '' && $area['visitable_type']=='Region') {
                 $period += $area['period'];
             }
         }
