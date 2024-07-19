@@ -40,13 +40,16 @@ class PackageController extends Controller
 
     public function index()
     {
-        $packages = Package::OrderBy('created_at', 'DESC')->get()->select('id', 'name', 'period','image','countries');
+        $packages = Package::all();
+        $packages->append(['countries','image']);
+        $packages->setHidden(['package_areas','deleted_at','updated_at','created_at','description']);
         return $this->success('All packages', ['packages' => $packages]);
     }
     
     public function index_archived()
     {
         $packages = Package::onlyTrashed()->select('id','name')->get();
+        $packages->setHidden(['package_areas']);
         return $this->success('All archived packages', ['packages' => $packages]);
     }
 
@@ -131,8 +134,9 @@ class PackageController extends Controller
         return $this->success('packege is added successfully');
     }
 
-    public function update(Package $package, Request $request)
+    public function update($id, Request $request)
     {
+        $package = Package::withTrashed()->findOrFail($id);
         $messages = [
             'added_hotels.*.id' => 'The selected added hotels id is invalid',
             'modify_hotels.*.id' => 'The selected modify hotels id is not in this package',

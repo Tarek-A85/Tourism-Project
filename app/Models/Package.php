@@ -11,14 +11,14 @@ class Package extends Model
     use HasFactory, SoftDeletes;
 
     protected $guarded = ['id'];
-
+    
     protected $appends = ['period'];
 
     public function getPeriodAttribute()
     {
         $period = 0;
         foreach ($this->package_areas as $area) {
-            if ($area['visitable']['region_id'] != '' && $area['visitable_type']=='Region') {
+            if ($area['visitable']['region_id'] == '' && $area['visitable_type']=='Region') {
                 $period += $area['period'];
             }
         }
