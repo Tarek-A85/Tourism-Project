@@ -11,7 +11,7 @@ class Package extends Model
     use HasFactory, SoftDeletes;
 
     protected $guarded = ['id'];
-
+    
     protected $appends = ['period'];
 
     public function getPeriodAttribute()
