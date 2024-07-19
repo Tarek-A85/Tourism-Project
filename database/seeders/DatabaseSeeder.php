@@ -28,7 +28,7 @@ class DatabaseSeeder extends Seeder
 
         $this->call(PackageSeeder::class);
 
-        $this->call(AirportSeeder::class);
+        //$this->call(AirportSeeder::class);
 
 
     }
