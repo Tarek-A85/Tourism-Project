@@ -10,7 +10,7 @@ class Hotel extends Model
 {
     use HasFactory, SoftDeletes;
 
-    protected $fillable = ['name', 'region_id', 'stars', 'description'];
+    protected $fillable = ['name', 'region_id', 'stars', 'description', 'price_per_room'];
 
     public function region(){
 
@@ -20,12 +20,6 @@ class Hotel extends Model
     public function previleges(){
 
         return $this->belongsToMany(Previlege::class)->withPivot('period')->as('info');
-    }
-
-   
-    public function room_info()
-    {
-        return $this->hasOne(Room::class)->withTrashed();
     }
 
     public function favorite()
@@ -50,5 +44,9 @@ class Hotel extends Model
         $city = Folder::where('folder_id', $country->id)->where('name', $this->region->name)->first();
 
       return  Folder::where('folder_id', $city->id)->where('name', $this->name)->first()->images;
+    }
+
+    public function hotel_transactions(){
+        return $this->hasMany(HotelTransaction::class);
     }
 }

@@ -22,7 +22,7 @@ class RegionController extends Controller
     public function index()
     {
         
-        $countries = Region::where('region_id', null)->select('id', 'name')->get();
+        $countries = Region::where('region_id', null)->select('id', 'name')->OrderBy('name')->get();
 
         return $this->success("All countries", ["countries" => $countries]);
 

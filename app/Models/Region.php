@@ -14,7 +14,7 @@ class Region extends Model
 
     public function cities(){
 
-        return $this->hasMany(Region::class, 'region_id');
+        return $this->hasMany(Region::class, 'region_id')->OrderBy('name');
     }
 
     public function country(){
@@ -43,5 +43,9 @@ class Region extends Model
 
         return $this->morphMany(PackageArea::class, 'visitable');
 
+    }
+
+    public function airports(){
+        return $this->hasMany(Airport::class);
     }
 }

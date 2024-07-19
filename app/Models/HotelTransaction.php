@@ -5,15 +5,15 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class RoomTransaction extends Model
+class HotelTransaction extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['transaction_id', 'room_id', 'number_of_rooms', 'staying_date_id', 'departure_date_id'];
+    protected $fillable = ['transaction_id', 'hotel_id', 'number_of_rooms', 'staying_date_id', 'departure_date_id'];
 
-    public function room(){
+    public function hotel(){
         
-        return $this->belongsTo(Room::class);
+        return $this->belongsTo(Hotel::class);
     }
 
     public function transaction(){

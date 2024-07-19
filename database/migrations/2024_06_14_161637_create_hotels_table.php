@@ -17,6 +17,7 @@ return new class extends Migration
             $table->text('description');
             $table->foreignId('region_id')->constrained();
             $table->decimal('stars', 5, 2);
+            $table->decimal('price_per_room', 12, 2);
             $table->timestamps();
             $table->softDeletes();
         });

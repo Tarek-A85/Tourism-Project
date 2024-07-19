@@ -22,11 +22,13 @@ class DatabaseSeeder extends Seeder
         
         $this->call(HotelSeeder::class);
         
-        $this->call(CompanySeeder::class);
+       // $this->call(CompanySeeder::class);
 
         $this->call(PackageTypeSeeder::class);
 
         $this->call(PackageSeeder::class);
+
+       // $this->call(AirportSeeder::class);
 
 
     }

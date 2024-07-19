@@ -26,9 +26,9 @@ class Transaction extends Model
         return $this->belongsTo(TransactionType::class, 'transaction_type_id');
     }
 
-    public function room_transactions(){
+    public function hotel_transactions(){
 
-        return $this->hasMany(RoomTransaction::class);
+        return $this->hasMany(HotelTransaction::class);
     }
 
     public function package_transactions()

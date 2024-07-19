@@ -6,7 +6,6 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Hotel;
 use App\Models\Region;
-use App\Models\Room;
 use App\Models\Folder;
 use App\Models\Previlege;
 use Illuminate\Validation\Rule;
@@ -31,7 +30,7 @@ class HotelController extends Controller
             $hotel->image = $hotel->images[0];
         }
 
-        $all_hotels = $all_hotels->select('id', 'name',  'stars', 'image', 'region');
+        $all_hotels = $all_hotels->select('id', 'name',  'stars', 'price_per_room', 'image', 'region');
 
         $home_hotels = $all_hotels->take(8);
 
@@ -54,8 +53,7 @@ class HotelController extends Controller
             "description" => ['required', 'max:300'],
             "stars" => ['required', 'decimal:0,2', 'gte:0', 'lte:5'],
             "region_id" => ['required', Rule::exists('regions', 'id')->where(fn($query)=> $query->where('region_id', '!=', null)->where('deleted_at', null))],
-            "number_of_rooms" => ['required', 'numeric', 'integer'],
-            "price_per_night" => ['required', 'numeric', 'decimal:0,2'],
+            "price_per_room" => ['required', 'numeric', 'decimal:0,2'],
             "photos" => ['required', 'array'],
             "photos.*" => ['required', 'image'],
             "previleges" => ['nullable', 'array'],
@@ -71,18 +69,12 @@ class HotelController extends Controller
         "description" => $request->description,
         "stars" => $request->stars,
         "region_id" => $request->region_id,
+        "price_per_room" => $request->price_per_room,
     ]);
 
     $region = Region::findOrFail($request->region_id);
 
     $country = $region->country->name;
-
-    $room = Room::create([
-        "hotel_id" => $hotel->id,
-        "total_number" => $request->number_of_rooms,
-        "available_number" => $request->number_of_rooms,
-        "price" => $request->price_per_night,
-    ]);
 
     $parent = Folder::firstOrCreate([
         "name" => $country,
@@ -126,10 +118,7 @@ class HotelController extends Controller
      */
     public function show(string $id)
     {
-        if(auth()->user()->is_admin == 1){
-       $hotel = Hotel::withTrashed()->with('previleges:id,name', 'region:name,id,region_id,deleted_at', 'room_info')->findOrFail($id);
-        }
-       else
+
        $hotel = Hotel::with('previleges:id,name', 'region:name,id,region_id,deleted_at')->findOrFail($id);
 
        $hotel->append('images');
@@ -150,8 +139,7 @@ class HotelController extends Controller
             "description" => ['required', 'max:300'],
             "stars" => ['required', 'decimal:0,2', 'gte:0', 'lte:5'],
             "region_id" => ['required', Rule::exists('regions', 'id')->where(fn($query)=> $query->where('region_id', '!=', null))],
-            "number_of_rooms" => ['required', 'numeric', 'integer'],
-            "price_per_night" => ['required', 'numeric', 'decimal:0,2'],
+            "price_per_room" => ['required', 'numeric', 'decimal:0,2'],
             'deleted_photos' => ['nullable', 'array'],
             'deleted_photos.*' => ['required', Rule::exists('photos', 'id')],
             'added_photos' => ['nullable', 'array'],
@@ -177,22 +165,13 @@ class HotelController extends Controller
 
         $hotel_folder = Folder::where('folder_id', $old_city_folder->id)->where('name', $hotel->name)->first();
 
-        $old_total_number_of_rooms = $hotel->room_info->total_number;
-
          $hotel->update([
             "name" => $request->name,
             "description" => $request->description,
             "stars" => $request->stars,
             "region_id" => $request->region_id,
+            "price_per_room" => $request->price_per_room,
         ]);
-
-        $room = Room::withTrashed()->where('hotel_id', $id)->first();
-
-      $room->update([
-        "total_number" => $request->number_of_rooms,
-        'available_number' => max($room->available_number + ($request->number_of_rooms - $old_total_number_of_rooms),0),
-        "price" => $request->price_per_night,
-       ]);
 
        if($request->deleted_photos){
 
@@ -257,7 +236,7 @@ class HotelController extends Controller
     {
         $hotel = Hotel::withTrashed()->find($id);
 
-        if($hotel->package_areas()->exists() || $hotel->room_info->room_transactions()->exists()){
+        if($hotel->package_areas()->exists() || $hotel->hotel_transactions()->exists()){
             return $this->fail("You can't permenentaly delete this hotel, it's used at some places");
         }
 
@@ -283,8 +262,6 @@ class HotelController extends Controller
 
     public function archive(Hotel $hotel){
 
-        $hotel->room_info()->delete();
-
         $hotel->delete();
 
         return $this->success("Hotel is temporariy deleted successfully");
@@ -293,7 +270,7 @@ class HotelController extends Controller
 
     public function index_archived(){
         
-        $hotels = Hotel::onlyTrashed()->with('previleges:id,name', 'region:name,id,region_id,deleted_at', 'room_info')->get();
+        $hotels = Hotel::onlyTrashed()->with('previleges:id,name', 'region:name,id,region_id,deleted_at')->get();
 
         return $this->success("Archived Hotels", ["Hotels" => $hotels]);
     }
@@ -301,8 +278,6 @@ class HotelController extends Controller
     public function restore_archived(String $id){
 
         $hotel = Hotel::onlyTrashed()->findOrFail($id);
-
-        $hotel->room_info()->restore();
 
         $hotel->restore();
 

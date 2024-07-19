@@ -7,7 +7,6 @@ use Illuminate\Database\Seeder;
 use App\Models\Hotel;
 use App\Models\Previlege;
 use App\Models\Photo;
-use App\Models\Room;
 use App\Models\Folder;
 use Illuminate\Support\Facades\Storage;
 class HotelSeeder extends Seeder
@@ -22,6 +21,7 @@ class HotelSeeder extends Seeder
             'description' => 'Amazing Hotel Which has a lot of interesting things',
             'region_id' => 2,
             'stars' => 5.00,
+            'price_per_room' => 5000,
         ]);
 
        $previlege = Previlege::create([
@@ -29,13 +29,6 @@ class HotelSeeder extends Seeder
         ]);
 
         $hotel->previleges()->attach($previlege->id,['period' => null]);
-
-        Room::create([
-            'hotel_id' => $hotel->id,
-            'total_number' => 10,
-            'available_number' => 10,
-            'price' => 3000,
-        ]);
 
        $country = Folder::create([
             'name' => 'Syria',

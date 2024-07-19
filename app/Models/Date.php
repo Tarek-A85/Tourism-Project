@@ -11,9 +11,9 @@ class Date extends Model
 
     protected $fillable = ['date'];
 
-    public function room_transactions(){
+    public function hotel_transactions(){
 
-        return $this->hasMany(RoomTransaction::class);
+        return $this->hasMany(HotelTransaction::class);
     }
 
     public function trip_details(){
