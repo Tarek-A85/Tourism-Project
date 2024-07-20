@@ -118,8 +118,12 @@ class HotelController extends Controller
      */
     public function show(string $id)
     {
-
-       $hotel = Hotel::with('previleges:id,name', 'region:name,id,region_id,deleted_at')->findOrFail($id);
+        if(auth()->user()->is_admin){
+            $hotel = Hotel::withTrashed()->with('previleges:id,name', 'region:name,id,region_id,deleted_at')->findOrFail($id);
+        }
+        else{
+           $hotel = Hotel::with('previleges:id,name', 'region:name,id,region_id,deleted_at')->findOrFail($id);
+        }
 
        $hotel->append('images');
 
@@ -234,7 +238,7 @@ class HotelController extends Controller
      */
     public function destroy(string $id)
     {
-        $hotel = Hotel::withTrashed()->find($id);
+        $hotel = Hotel::withTrashed()->findOrFail($id);
 
         if($hotel->package_areas()->exists() || $hotel->hotel_transactions()->exists()){
             return $this->fail("You can't permenentaly delete this hotel, it's used at some places");
