@@ -40,32 +40,30 @@ class PackageController extends Controller
 
     public function index()
     {
-        $packages = Package::all();
-        $packages->append(['countries','image']);
-        $packages->setHidden(['package_areas','deleted_at','updated_at','created_at','description']);
+        $packages = Package::OrderBy('id', 'DESC')->get();
+        $packages->append(['countries', 'image']);
+        $packages->setHidden(['package_areas', 'deleted_at', 'updated_at', 'created_at', 'description']);
         return $this->success('All packages', ['packages' => $packages]);
     }
-    
+
     public function index_archived()
     {
-        $packages = Package::onlyTrashed()->select('id','name')->get();
+        $packages = Package::onlyTrashed()->select('id', 'name')->get();
         $packages->setHidden(['package_areas']);
         return $this->success('All archived packages', ['packages' => $packages]);
     }
 
     public function show($id)
     {
-        if(auth()->user()->is_admin)
-            $package = Package::withTrashed()->with('types:id,name','package_areas')->findOrFail($id);
+        if (auth()->user()->is_admin)
+            $package = Package::withTrashed()->with('types:id,name','companies')->findOrFail($id);
         else
-            $package = Package::with('types:id,name','package_areas')->findOrFail($id);
-        
-        // $package->setHidden(['image']);
-        $package->images = Folder::where([['name', '=', $package->name], ['folder_id', '=', 2]])->first()->images ?? null;
-        // $areas = $package->package_areas->groupBy('visitable_type');
-        // $hotels = $areas['App\\Models\\Hotel'];
-        // $regions = $areas['App\\Models\\Region']->groupBy('visitable.region_id');
-        return $this->success('Package informations',['package'=>$package]);
+            $package = Package::with('types:id,name','companies')->findOrFail($id);
+
+        $package->makeVisible('package_areas');
+        $package->images = $package->images;
+
+        return $this->success('Package informations', ['package' => $package]);
     }
 
     public function store(Request $request)
@@ -82,17 +80,17 @@ class PackageController extends Controller
             'adult_price' => ['required', 'decimal:2'],
             'child_price' => ['required', 'decimal:2'],
             'hotels' => ['array', 'nullable'],
-            'hotels.*.id' => ['required','numeric',Rule::exists('hotels', 'id')],
+            'hotels.*.id' => ['required', 'numeric', Rule::exists('hotels', 'id')],
             'hotels.*.period' => ['required', 'numeric'],
             'regions' => ['array', 'required'],
-            'regions.*.id' => ['required','numeric',Rule::exists('regions', 'id')],
+            'regions.*.id' => ['required', 'numeric', Rule::exists('regions', 'id')],
             'regions.*.period' => ['required', 'numeric'],
             'photos' => ['nullable', 'array'],
             'photos.*' => ['required', 'image'],
             'types' => ['required', 'array'],
             'types.*' => ['required', 'string'],
-            'flight_companies' => ['nullable','array'],
-            'flight_companies.*' => ['required','numeric',Rule::exists('companies','id')]
+            'flight_companies' => ['nullable', 'array'],
+            'flight_companies.*' => ['required', 'numeric', Rule::exists('companies', 'id')]
         ], $messages);
 
         if ($validator->fails()) {
@@ -211,7 +209,7 @@ class PackageController extends Controller
                     ->where(fn ($query) => $query->where('package_id', $package->id))
             ],
             'added_types' => ['nullable', 'array'],
-            'added_types.*' => ['required', 'string','regex:/^[a-zA-Z ]+$/'],
+            'added_types.*' => ['required', 'string', 'regex:/^[a-zA-Z ]+$/'],
             'deleted_companies' => ['nullable', 'array'],
             'deleted_companies.*' => [
                 'required',
@@ -219,8 +217,8 @@ class PackageController extends Controller
                     ->where(fn ($query) => $query->where('package_id', $package->id))
             ],
             'added_companies' => ['nullable', 'array'],
-            'added_companies.*' => ['required', 'numeric',Rule::exists('companies','id')]
-        ],$messages);
+            'added_companies.*' => ['required', 'numeric', Rule::exists('companies', 'id')]
+        ], $messages);
 
         if ($validator->fails()) {
             return $this->fail($validator->errors()->first());

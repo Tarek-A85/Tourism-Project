@@ -30,7 +30,8 @@ class AppServiceProvider extends ServiceProvider
         Relation::MorphMap([
             'Hotel' => 'App\Models\Hotel',
             'Region' => 'App\Models\Region',
-            'Package' => 'App\Models\Package'
+            'Package' => 'App\Models\Package',
+            'Company' => 'App\Models\Company'
         ]);
         
         RateLimiter::for('forgot_password_code', function (Request $request) {

@@ -11,6 +11,7 @@ class Company extends Model
     use HasFactory, SoftDeletes;
 
     protected $fillable = ['name','description'];
+    protected $hidden = ['pivot'];
 
     public function flights()
     {
@@ -35,5 +36,15 @@ class Company extends Model
     public function packages()
     {
         return $this->belongsToMany(Package::class);
+    }
+
+    public function getImagesAttribute(){
+
+        $country = Folder::where('folder_id', 6)->where('name', $this->country->name)->first();
+
+
+        $company = Folder::where('folder_id', $country->id)->where('name', $this->name)->first();
+
+          return $company->images;
     }
 }

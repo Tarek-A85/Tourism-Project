@@ -5,14 +5,15 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 
 class Package extends Model
 {
     use HasFactory, SoftDeletes;
 
     protected $guarded = ['id'];
-    
-    protected $appends = ['period'];
+    protected $hidden = ['package_areas'];
+    protected $appends = ['period','image'];
 
     public function getPeriodAttribute()
     {
@@ -77,5 +78,10 @@ class Package extends Model
     public function companies()
     {
         return $this->belongsToMany(Company::class);
+    }
+
+    public function getImagesAttribute(){
+        $folder = Folder::where('folder_id', 2)->where('name', $this->name)->first();
+        return $folder ? $folder->images : null;
     }
 }

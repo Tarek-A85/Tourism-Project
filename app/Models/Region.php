@@ -48,4 +48,18 @@ class Region extends Model
     public function airports(){
         return $this->hasMany(Airport::class);
     }
+
+    public function getImagesAttribute(){
+
+        if($this->region_id == null){
+        $country = Folder::where('folder_id', 1)->where('name', $this->name)->first();
+        }
+        else{
+            $country = Folder::where('folder_id', 1)->where('name', $this->country->name)->first();
+        }
+       
+        $city = Folder::where('folder_id', $country->id)->where('name', $this->name)->first();
+
+      return  $city->images;
+    }
 }
