@@ -26,15 +26,26 @@ class FavoriteController extends Controller
 
     public function show($id)
     {
-        //return list info
         $list = FavoriteList::with('favorites')->where('id', $id)->firstOrFail();
         if ($list->user_id !== auth()->user()->id)
             return $this->fail('You are not authorized');
-        $list->favorites->load('favorable');
+
         foreach ($list->favorites as $item) {
-            switch ($item->favorable_type) {
+            $item->load('favorable');
+            if ($item->favorable->deleted_at)
+                $item->delete();
+            else
+                $item->restore();
+        }
+
+        $list = FavoriteList::with('favorites')->where('id', $id)->firstOrFail();
+        $list->load('favorites.favorable');
+        
+        foreach ($list->favorites as $item) {
+            if(!$item->deleted_at)
+            switch ($item->favorable_type ) {
                 case 'Hotel': {
-                        $item->image = Hotel::find($item->favorable_id)->images[0];
+                        $item->image = Hotel::where('id', $item->favorable_id)->first()->images[0];
                         break;
                     }
                 case 'Package': {
@@ -180,8 +191,8 @@ class FavoriteController extends Controller
             'deleted_lists.*' => [
                 'required',
                 'numeric',
-                Rule::exists('lists','id')
-                    ->where(fn ($query) => $query->where('user_id',auth()->user()->id)->where('name','!=','default'))
+                Rule::exists('lists', 'id')
+                    ->where(fn ($query) => $query->where('user_id', auth()->user()->id)->where('name', '!=', 'default'))
             ]
         ], $message);
         if ($validator->fails()) {

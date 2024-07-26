@@ -13,10 +13,7 @@ use App\Http\Controllers\Auth\{
 use App\Http\Controllers\Both\{
     RegionController,
     HotelController,
-    PackageController,
-    AirportController,
-    CompanyController,
-    FlightController,
+    PackageController
 };
 use App\Http\Controllers\User\{
     FavoriteController,
@@ -98,8 +95,6 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::apiResource('regions', RegionController::class)->only(['index', 'show']);
         Route::apiResource('hotels', HotelController::class)->only(['index', 'show']);
         Route::apiResource('package',PackageController::class)->only(['index','show']);
-        Route::apiResource('companies', CompanyController::class)->only(['index', 'show']);
-        Route::get('airport', [AirportController::class, 'index']);
      });
    
 });

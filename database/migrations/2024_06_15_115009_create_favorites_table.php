@@ -16,6 +16,7 @@ return new class extends Migration
             $table->foreignId('list_id')->constrained()->cascadeOnDelete();
             $table->morphs('favorable');
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 

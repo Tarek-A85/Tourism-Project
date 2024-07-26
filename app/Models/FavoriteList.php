@@ -20,6 +20,6 @@ class FavoriteList extends Model
 
     public function favorites()
     {
-        return $this->hasMany(Favorite::class, 'list_id', 'id');
+        return $this->hasMany(Favorite::class, 'list_id', 'id')->withTrashed();
     }
 }

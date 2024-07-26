@@ -4,10 +4,11 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Favorite extends Model
 {
-    use HasFactory;
+    use HasFactory,SoftDeletes;
 
     protected $guarded = ['id'];
 
@@ -18,7 +19,7 @@ class Favorite extends Model
 
     public function favorable(){
 
-        return $this->morphTo(__FUNCTION__, 'favorable_type', 'favorable_id');
+        return $this->morphTo(__FUNCTION__, 'favorable_type', 'favorable_id')->withTrashed();
     }
 
 }

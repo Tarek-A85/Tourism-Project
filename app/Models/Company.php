@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\DB;
 
 class Company extends Model
 {
@@ -58,10 +59,10 @@ class Company extends Model
           return $company->images;
     }
 
-    function forceDelete()
+    public function forceDelete()
     {
         $this->favorite()->forceDelete();
 
-        $this->delete();
+        DB::table($this->table)->where('id',$this->id)->delete();
     }
 }

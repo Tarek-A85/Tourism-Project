@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Casts\Attribute;
+use Illuminate\Support\Facades\DB;
 
 class Package extends Model
 {
@@ -13,13 +14,20 @@ class Package extends Model
 
     protected $guarded = ['id'];
     protected $hidden = ['package_areas'];
-    protected $appends = ['period','image'];
+    protected $appends = ['period', 'image'];
+
+    public function forceDelete()
+    {
+        $this->favorite()->forceDelete();
+
+        DB::table($this->table)->where('id',$this->id)->delete();
+    }
 
     public function getPeriodAttribute()
     {
         $period = 0;
         foreach ($this->package_areas as $area) {
-            if ($area['visitable']['region_id'] == '' && $area['visitable_type']=='Region') {
+            if ($area['visitable']['region_id'] == '' && $area['visitable_type'] == 'Region') {
                 $period += $area['period'];
             }
         }
@@ -80,7 +88,8 @@ class Package extends Model
         return $this->belongsToMany(Company::class);
     }
 
-    public function getImagesAttribute(){
+    public function getImagesAttribute()
+    {
         $folder = Folder::where('folder_id', 2)->where('name', $this->name)->first();
         return $folder ? $folder->images : null;
     }

@@ -17,17 +17,12 @@ class PackageArea extends Model
         return $this->visitable->name;
     }
 
-    // public function getTypeAttribute()
-    // {
-        
-    // }
-
     public function package(){
 
         return $this->belongsTo(Package::class);
     }
 
     public function visitable(){
-        return $this->morphTo(__FUNCTION__, 'visitable_type', 'visitable_id');
+        return $this->morphTo(__FUNCTION__, 'visitable_type', 'visitable_id')->withTrashed();
     }
 }

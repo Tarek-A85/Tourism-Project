@@ -5,6 +5,8 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\DB;
+
 class Region extends Model
 {
     use HasFactory, SoftDeletes;
@@ -72,11 +74,11 @@ class Region extends Model
       return  $city->images;
     }
 
-    function forceDelete()
+    public function forceDelete()
     {
         $this->favorite()->forceDelete();
 
-        $this->delete();
+        DB::table($this->table)->where('id',$this->id)->delete();
     }
 
     

@@ -317,12 +317,12 @@ class PackageController extends Controller
     public function archive(Package $package)
     {
         // delete every tipe
-        $trips = $package->trip_detail;
-        foreach ($trips as $trip) {
-            if ($trip->date->date > now()) {
-                $trip->delete();
-            }
-        }
+        // $trips = $package->trip_detail;
+        // foreach ($trips as $trip) {
+        //     if ($trip->date->date > now()) {
+        //         $trip->delete();
+        //     }
+        // }
 
         $package->delete();
         return $this->success('package is temporariy deleted successfully and all its tips is canclled');
@@ -341,18 +341,18 @@ class PackageController extends Controller
     {
         $package = Package::withTrashed()->findOrFail($id);
 
-        $trips = $package->trip_detail;
+        // $trips = $package->trip_detail;
 
-        if (empty($trips)) {
-            $oldestTrip = $trips->min('date')->date;
+        // if (empty($trips)) {
+        //     $oldestTrip = $trips->min('date')->date;
 
-            if ($oldestTrip < now())
-                return $this->fail("You can't permenentaly delete this Package, it's used at some places");
+        //     if ($oldestTrip < now())
+        //         return $this->fail("You can't permenentaly delete this Package, it's used at some places");
 
-            foreach ($trips as $trip) {
-                $trip->delete();
-            }
-        }
+        //     foreach ($trips as $trip) {
+        //         $trip->delete();
+        //     }
+        // }
 
         if (File::exists(storage_path("app/Packages/$package->name"))) {
             Folder::where([['name', '=', $package->name], ['folder_id', '=', 2]])->first()->delete();
