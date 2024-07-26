@@ -44,10 +44,13 @@ class Company extends Model
         return $this->belongsToMany(Package::class);
     }
 
+<<<<<<< HEAD
     public function country(){
         return $this->belongsTo(Region::class, 'country_id')->withTrashed();
     }
 
+=======
+>>>>>>> 596e80f64d3e753a38601da97c5ca00d76ef31d8
     public function getImagesAttribute(){
 
         $country = Folder::where('folder_id', 6)->where('name', $this->country->name)->first();
@@ -57,6 +60,7 @@ class Company extends Model
 
           return $company->images;
     }
+<<<<<<< HEAD
 
     function forceDelete()
     {
@@ -64,4 +68,6 @@ class Company extends Model
 
         $this->delete();
     }
+=======
+>>>>>>> 596e80f64d3e753a38601da97c5ca00d76ef31d8
 }

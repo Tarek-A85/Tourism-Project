@@ -18,7 +18,10 @@ use App\Http\Controllers\Both\{
     CompanyController,
     FlightController,
 };
-use App\Http\Controllers\User\WalletController;
+use App\Http\Controllers\User\{
+    FavoriteController,
+    WalletController
+};
 
 Route::post('google/signup', [GoogleController::class, 'sign_up'])->name('google_sign_up');
 Route::post('google/signin', [GoogleController::class, 'sign_in'])->name('google_sign_in');
@@ -43,6 +46,10 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::middleware('verified')->group(function () {
 
         Route::middleware('is_user')->group(function () {
+            Route::apiResource('favorite',FavoriteController::class)->except(['edite','create','destroy']);
+            Route::delete('favorite',[FavoriteController::class,'destroy']);
+            Route::post('favorite/add/item',[FavoriteController::class,'add_to_list']);
+            Route::post('favorite/remvoe/item',[FavoriteController::class,'remove_from_list']);
 
             Route::prefix('/wallet')->group(function () {
                 Route::post('/create', [WalletController::class, 'create'])->name('create_wallet');
