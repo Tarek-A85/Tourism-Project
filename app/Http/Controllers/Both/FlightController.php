@@ -20,7 +20,7 @@ class FlightController extends Controller
         $validator = Validator::make($request->all(), [
             'start_airport_id' => ['required', Rule::exists('airports', 'id')],
             'end_airport_id' => ['required', Rule::exists('airports', 'id')->where( fn($query) => $query->where('id', '!=', $request->start_airport_id))],
-            'company_id' => ['nullable', Rule::exists('companies', 'id')],
+            'company_id' => ['nullable', Rule::exists('companies', 'id')->where( fn($query) => $query->where('deleted_at', null))],
             'adults_number' => ['required', 'numeric', 'min:1', 'max:6'],
             'children_number' => ['required', 'numeric', 'min:0', new MaxChildrenRule],
             'class_id' => ['required', Rule::exists('flight_types', 'id')],
