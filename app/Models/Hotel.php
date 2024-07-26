@@ -14,7 +14,11 @@ class Hotel extends Model
 
     public function region(){
 
-        return $this->belongsTo(Region::class, 'region_id')->withTrashed()->with('country:id,name,deleted_at');
+        return $this->belongsTo(Region::class, 'region_id')->withTrashed()->with(['country' => function($query){
+
+            $query->withTrashed()->select('id','name','deleted_at');
+            
+        }]);
     }
 
     public function previleges(){
@@ -48,5 +52,12 @@ class Hotel extends Model
 
     public function hotel_transactions(){
         return $this->hasMany(HotelTransaction::class);
+    }
+
+    function forceDelete()
+    {
+        $this->favorite()->forceDelete();
+
+        $this->delete();
     }
 }

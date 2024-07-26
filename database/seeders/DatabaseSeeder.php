@@ -18,6 +18,12 @@ class DatabaseSeeder extends Seeder
 
         $this->call(FolderSeeder::class);
 
+        $this->call(FlightTypeSeeder::class);
+
+        $this->call(AirportSeeder::class);
+
+        $this->call(DateSeeder::class);
+
         $this->call(RegionSeeder::class);
         
         $this->call(HotelSeeder::class);
@@ -28,7 +34,7 @@ class DatabaseSeeder extends Seeder
 
         $this->call(PackageSeeder::class);
 
-        //$this->call(AirportSeeder::class);
+        
 
 
     }

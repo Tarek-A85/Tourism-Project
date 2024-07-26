@@ -16,11 +16,6 @@ class TripDetail extends Model
         return $this->belongsTo(Date::class);
     }
 
-    public function flightTransaction()
-    {
-        return $this->hasMany(FlightTransaction::class);
-    }
-
     public function packageTransaction()
     {
         return $this->hasMany(PackageTransaction::class);

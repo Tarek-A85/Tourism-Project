@@ -11,14 +11,15 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('flights', function (Blueprint $table) {
+        Schema::create('flight_details', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('company_id')->constrained('companies')->cascadeOnDelete();
-            $table->foreignId('start_airport_id')->constrained('airports');
-            $table->foreignId('end_airport_id')->constrained('airports');
+            $table->foreignId('flight_time_id')->constrained('flight_times')->cascadeOnDelete();
+            $table->foreignId('flight_type_id')->constrained('flight_types');
+            $table->bigInteger('available_tickets');
+            $table->decimal('adult_price', 10, 2);
+            $table->decimal('child_price', 10, 2);
             $table->timestamps();
             $table->softDeletes();
-            $table->unique(['company_id', 'start_airport_id', 'end_airport_id']);
         });
     }
 
@@ -27,6 +28,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('flights');
+        Schema::dropIfExists('flight_details');
     }
 };

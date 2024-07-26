@@ -11,14 +11,13 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('flights', function (Blueprint $table) {
+        Schema::create('flight_times', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('company_id')->constrained('companies')->cascadeOnDelete();
-            $table->foreignId('start_airport_id')->constrained('airports');
-            $table->foreignId('end_airport_id')->constrained('airports');
+            $table->foreignId('flight_id')->constrained('flights')->cascadeOnDelete();
+            $table->foreignId('date_id')->constrained('dates');
+            $table->time('time');
             $table->timestamps();
             $table->softDeletes();
-            $table->unique(['company_id', 'start_airport_id', 'end_airport_id']);
         });
     }
 
@@ -27,6 +26,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('flights');
+        Schema::dropIfExists('flight_times');
     }
 };

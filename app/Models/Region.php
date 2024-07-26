@@ -22,12 +22,17 @@ class Region extends Model
         return $this->belongsTo(Region::class, 'region_id');
     }
 
+    public function country_with_trashed(){
+
+        return $this->belongsTo(Region::class, 'region_id')->As('country');
+    }
+
     public function hotels(){
 
         return $this->hasMany(Hotel::class);
     }
 
-    public function favorites()
+    public function favorite()
     {
         return $this->morphMany(Favorite::class,'favorable');
     }
@@ -48,4 +53,31 @@ class Region extends Model
     public function airports(){
         return $this->hasMany(Airport::class);
     }
+
+    public function companies(){
+        return $this->hasMany(Company::class);
+    }
+
+    public function getImagesAttribute(){
+
+        if($this->region_id == null){
+        $country = Folder::where('folder_id', 1)->where('name', $this->name)->first();
+        }
+        else{
+            $country = Folder::where('folder_id', 1)->where('name', $this->country->name)->first();
+        }
+       
+        $city = Folder::where('folder_id', $country->id)->where('name', $this->name)->first();
+
+      return  $city->images;
+    }
+
+    function forceDelete()
+    {
+        $this->favorite()->forceDelete();
+
+        $this->delete();
+    }
+
+    
 }

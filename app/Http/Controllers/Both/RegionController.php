@@ -290,6 +290,7 @@ class RegionController extends Controller
             return $this->success("All cities",  ["cities" => $cities]);
 
         }
+
     }
 
     

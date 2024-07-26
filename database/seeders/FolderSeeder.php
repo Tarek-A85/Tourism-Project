@@ -36,5 +36,10 @@ class FolderSeeder extends Seeder
             'name' => 'Users',
             'folder_id' => null,
         ]);
+
+        Folder::create([
+            'name' => 'Companies',
+            'folder_id' => null,
+        ]);
     }
 }

@@ -13,7 +13,10 @@ use App\Http\Controllers\Auth\{
 use App\Http\Controllers\Both\{
     RegionController,
     HotelController,
-    PackageController
+    PackageController,
+    AirportController,
+    CompanyController,
+    FlightController,
 };
 use App\Http\Controllers\User\WalletController;
 
@@ -21,6 +24,10 @@ Route::post('google/signup', [GoogleController::class, 'sign_up'])->name('google
 Route::post('google/signin', [GoogleController::class, 'sign_in'])->name('google_sign_in');
 Route::post('/singup', [AuthenticatedController::class, 'singup']);
 Route::post('/login', [AuthenticatedController::class, 'login']);
+
+
+Route::get('test', [FlightController::class, 'test']);
+
 
 Route::middleware('check_email')->group(function () {
     Route::post('/send/forgotten/password/code', [ForgotPasswordController::class, 'send_forgotten_password_code'])->name('send_forgotten_password_code')->middleware('throttle:forgot_password_code');
@@ -43,7 +50,11 @@ Route::middleware(['auth:sanctum'])->group(function () {
                 Route::post('/validate/resetting/code', [ResetPasswordController::class, 'validate_code'])->name('validate_resetting_code');
                 Route::post('/reset/password', [WalletController::class, 'restePassword'])->name('reset_wallet_password');
             });
+
+           
         });
+
+        Route::post('flights/search', [FlightController::class, 'search']);
 
 
         Route::middleware('can_change_password')->group(function () {
@@ -69,12 +80,19 @@ Route::middleware(['auth:sanctum'])->group(function () {
             Route::delete('package/archive/{package}',[PackageController::class,'archive']);
             Route::get('package/archived',[PackageController::class,'index_archived']);
             Route::get('package/restore/archived/{id}',[PackageController::class,'restore_archived']);
+
+            Route::get('companies/restore/archived/{id}', [CompanyController::class, 'restore']);
+            Route::get('companies/archived', [CompanyController::class, 'index_archived']);
+            Route::delete('companies/archive/{company}', [CompanyController::class, 'archive']);
+            Route::apiResource('companies', CompanyController::class)->only(['store', 'update', 'destroy']);
         });
       
         Route::delete('/logout',[AuthenticatedController::class,'logout']);
         Route::apiResource('regions', RegionController::class)->only(['index', 'show']);
         Route::apiResource('hotels', HotelController::class)->only(['index', 'show']);
         Route::apiResource('package',PackageController::class)->only(['index','show']);
+        Route::apiResource('companies', CompanyController::class)->only(['index', 'show']);
+        Route::get('airport', [AirportController::class, 'index']);
      });
    
 });
