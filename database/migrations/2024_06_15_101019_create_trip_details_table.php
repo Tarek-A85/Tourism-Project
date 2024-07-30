@@ -11,11 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('trip_details', function (Blueprint $table) {
+        Schema::create('package_details', function (Blueprint $table) {
             $table->id();
-            $table->morphs('detailable');
+            $table->foreignId('package_id')->constrained();
             $table->foreignId('date_id')->constrained();
-            $table->timestamp('time');
+            $table->time('time');
             $table->unsignedInteger('num_of_tickets');
             $table->unsignedInteger('available_tickets');
             $table->timestamps();
@@ -28,5 +28,6 @@ return new class extends Migration
     public function down(): void
     {
         Schema::dropIfExists('trip_details');
+        Schema::dropIfExists('package_details');
     }
 };

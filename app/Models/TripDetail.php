@@ -10,7 +10,9 @@ class TripDetail extends Model
     use HasFactory;
 
     protected $guarded = ['id'];
-    
+    protected $table = 'package_details';
+    protected $with = ['date'];
+
     public function date()
     {
         return $this->belongsTo(Date::class);
@@ -23,6 +25,6 @@ class TripDetail extends Model
 
     public function detailable()
     {
-        return $this->morphto();
+        return $this->belongsTo(Package::class);
     }
 }

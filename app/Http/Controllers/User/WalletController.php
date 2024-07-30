@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\User;
 
 use App\Http\Controllers\Controller;
-use App\Models\FavoriteList;
 use App\Models\Wallet;
 use Ichtrojan\Otp\Otp;
 use Illuminate\Http\Request;
@@ -35,11 +34,6 @@ class WalletController extends Controller
             'user_id' => auth()->id(),
             'balance' => 0,
             'password' => Hash::make($request->password)
-        ]);
-
-        FavoriteList::create([
-            'name' => 'default',
-            'user_id' => auth()->id()
         ]);
 
         return $this->success('your wallet created successfuly');
