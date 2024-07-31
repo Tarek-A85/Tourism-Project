@@ -16,6 +16,7 @@ use App\Http\Controllers\Both\{
     RegionController,
     HotelController,
     PackageController,
+    PackageTypeController,
     TripController,
 };
 use App\Http\Controllers\User\{
@@ -100,6 +101,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::apiResource('regions', RegionController::class)->only(['index', 'show']);
         Route::apiResource('hotels', HotelController::class)->only(['index', 'show']);
         Route::apiResource('package',PackageController::class)->only(['index','show']);
+        Route::get('packageTypes',PackageTypeController::class);
         Route::get('package/trip/{package}',[TripController::class,'index']);
      });
    

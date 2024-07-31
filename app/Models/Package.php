@@ -5,7 +5,6 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Support\Facades\DB;
 
 class Package extends Model
@@ -14,24 +13,13 @@ class Package extends Model
 
     protected $guarded = ['id'];
     protected $hidden = ['package_areas'];
-    protected $appends = ['period', 'image'];
+    protected $appends = ['image'];
 
     public function forceDelete()
     {
         $this->favorite()->forceDelete();
 
         DB::table($this->table)->where('id',$this->id)->delete();
-    }
-
-    public function getPeriodAttribute()
-    {
-        $period = 0;
-        foreach ($this->package_areas as $area) {
-            if ($area['visitable']['region_id'] == '' && $area['visitable_type'] == 'Region') {
-                $period += $area['period'];
-            }
-        }
-        return $period;
     }
 
     public function getImageAttribute()
@@ -70,7 +58,7 @@ class Package extends Model
 
     public function trip_detail()
     {
-        return $this->morphMany(TripDetail::class, 'detailable');
+        return $this->hasMany(TripDetail::class);
     }
 
     public function package_areas()

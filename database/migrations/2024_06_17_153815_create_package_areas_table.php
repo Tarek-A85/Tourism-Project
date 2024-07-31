@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('package_id')->constrained()->cascadeOnDelete();
             $table->morphs('visitable');
-            $table->integer('period');
+            $table->decimal('period',8,1)->nullable();
             $table->timestamps();
         });
     }
