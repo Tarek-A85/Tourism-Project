@@ -17,9 +17,11 @@ class TripController extends Controller
     public function index(Package $package)
     {
         $trips = $package->trip_detail;
-        
-        if(!auth()->user()->is_admin)
+
+        if (!auth()->user()->is_admin) {
             $trips = $trips->where('date.date', '>', now());
+            $trips->makeHidden(['auto_tracking']);
+        }
 
         return $this->success("All {$package->name} package trips", $trips);
     }
@@ -46,7 +48,7 @@ class TripController extends Controller
             ->where('date_id', $date_id)
             ->where('time', $request->time)->first()
         ) {
-            return $this->fail('there is a trip at the same time');
+            return $this->fail('there is a trip at the same time for this package');
         }
 
         TripDetail::create([
@@ -71,21 +73,31 @@ class TripController extends Controller
             return $this->fail($validator->errors()->first());
         }
 
-        if($trip->date->date <= now())
-        {
+        if ($trip->date->date <= now()) {
             return $this->fail('You can\'t update a trip already started');
+        }
+
+
+        $date_id = Date::where('date', $request->date)->first()->id;
+
+        if (
+            TripDetail::where('package_id', $trip->package_id)
+            ->where('date_id', $date_id)
+            ->where('time', $request->time)->first()
+        ) {
+            return $this->fail('there is a trip at the same time for this package');
         }
 
         $reservedTickets = ($trip->num_of_tickets - $trip->available_tickets);
         $available_tickets = $request->num_of_tickets - $reservedTickets;
-        
+
         if ($request->num_of_tickets <= $reservedTickets) {
             //cancel some tickets
             $available_tickets = 0;
         }
 
         $trip->update([
-            'date_id' => Date::where('date', $request->date)->first()->id,
+            'date_id' => $date_id,
             'time' => $request->time,
             'num_of_tickets' => $request->num_of_tickets,
             'available_tickets' => $available_tickets,

@@ -12,6 +12,7 @@ class TripDetail extends Model
     protected $guarded = ['id'];
     protected $table = 'package_details';
     protected $with = ['date'];
+    protected $hidden = ['delay','current_area'];
 
     public function date()
     {
@@ -23,8 +24,13 @@ class TripDetail extends Model
         return $this->hasMany(PackageTransaction::class);
     }
 
-    public function detailable()
+    public function package()
     {
         return $this->belongsTo(Package::class);
+    }
+
+    public function areas()
+    {
+        return  $this->package->package_areas->where('visitable_type','Region')->where('visitable.region_id','!=','')->select('name','period');
     }
 }

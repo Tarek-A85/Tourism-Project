@@ -18,6 +18,9 @@ return new class extends Migration
             $table->time('time');
             $table->unsignedInteger('num_of_tickets');
             $table->unsignedInteger('available_tickets');
+            $table->integer('current_area')->default(1);
+            $table->decimal('delay',5,2)->default(0);
+            $table->boolean('auto_tracking')->default(1);
             $table->timestamps();
         });
     }

@@ -16,8 +16,8 @@ use App\Http\Controllers\Both\{
     PackageController,
     PackageTypeController,
     TripController,
+    TrackingController
 };
-use App\Http\Controllers\TrackingController;
 use App\Http\Controllers\User\{
     FavoriteController,
     WalletController
