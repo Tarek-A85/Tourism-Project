@@ -15,11 +15,31 @@ class Package extends Model
     protected $hidden = ['package_areas'];
     protected $appends = ['image'];
 
+    public function scopeFilter($query, $filters)
+    {
+        $query->when(
+            $filters['search'] ?? false,
+            fn ($query, $search)
+            => $query->where('name', 'like', '%' . $search . '%')
+                ->orWhereHas('package_areas', fn ($query) => $query
+                    ->where('package_areas.visitable_id', Region::where(fn($query)=>$query->where('name','like', '%' . $search . '%'))->first()->id ?? 0)
+                    ->where('package_areas.visitable_type', 'Region'))
+        );
+
+        $query->when(
+            $filters['type'] ?? false,
+            fn ($query, $type)
+            =>
+            $query->whereHas('types', fn ($query) => $query
+                ->where('name', $type))
+        );
+    }
+
     public function forceDelete()
     {
         $this->favorite()->forceDelete();
 
-        DB::table($this->table)->where('id',$this->id)->delete();
+        DB::table($this->table)->where('id', $this->id)->delete();
     }
 
     public function getImageAttribute()

@@ -48,7 +48,7 @@ class PackageController extends Controller
 
     public function index()
     {
-        $packages = Package::OrderBy('id', 'DESC')->get();
+        $packages = Package::latest()->filter(request(['search','type']))->OrderBy('id', 'DESC')->get();
         $packages->append(['countries', 'image']);
         $packages->setHidden(['package_areas', 'deleted_at', 'updated_at', 'created_at', 'description']);
         return $this->success('All packages', ['packages' => $packages]);
@@ -56,7 +56,7 @@ class PackageController extends Controller
 
     public function index_archived()
     {
-        $packages = Package::onlyTrashed()->select('id', 'name')->get();
+        $packages = Package::onlyTrashed()->latest()->filter(request(['search','type']))->select('id', 'name')->get();
         $packages->setHidden(['package_areas']);
         return $this->success('All archived packages', ['packages' => $packages]);
     }
