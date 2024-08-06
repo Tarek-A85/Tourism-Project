@@ -5,7 +5,6 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Support\Facades\DB;
 
 class Package extends Model
@@ -14,24 +13,33 @@ class Package extends Model
 
     protected $guarded = ['id'];
     protected $hidden = ['package_areas'];
-    protected $appends = ['period', 'image'];
+    protected $appends = ['image'];
+
+    public function scopeFilter($query, $filters)
+    {
+        $query->when(
+            $filters['search'] ?? false,
+            fn ($query, $search)
+            => $query->where('name', 'like', '%' . $search . '%')
+                ->orWhereHas('package_areas', fn ($query) => $query
+                    ->where('package_areas.visitable_id', Region::where(fn($query)=>$query->where('name','like', '%' . $search . '%'))->first()->id ?? 0)
+                    ->where('package_areas.visitable_type', 'Region'))
+        );
+
+        $query->when(
+            $filters['type'] ?? false,
+            fn ($query, $type)
+            =>
+            $query->whereHas('types', fn ($query) => $query
+                ->where('name', $type))
+        );
+    }
 
     public function forceDelete()
     {
         $this->favorite()->forceDelete();
 
-        DB::table($this->table)->where('id',$this->id)->delete();
-    }
-
-    public function getPeriodAttribute()
-    {
-        $period = 0;
-        foreach ($this->package_areas as $area) {
-            if ($area['visitable']['region_id'] == '' && $area['visitable_type'] == 'Region') {
-                $period += $area['period'];
-            }
-        }
-        return $period;
+        DB::table($this->table)->where('id', $this->id)->delete();
     }
 
     public function getImageAttribute()
@@ -70,7 +78,7 @@ class Package extends Model
 
     public function trip_detail()
     {
-        return $this->morphMany(TripDetail::class, 'detailable');
+        return $this->hasMany(TripDetail::class);
     }
 
     public function package_areas()

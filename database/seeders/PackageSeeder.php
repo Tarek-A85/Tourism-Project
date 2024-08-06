@@ -29,6 +29,7 @@ class PackageSeeder extends Seeder
             'description' => 'visit the land of yasamin',
             'adult_price' => 100,
             'child_price' => 75,
+            'period' => 50
         ]);
         $this->add_to_package_area($package1->id,[1,10],'Hotel');
         $this->add_to_package_area($package1->id,[1,10],'Region');
@@ -41,6 +42,7 @@ class PackageSeeder extends Seeder
             'description' => 'Let\'s go to Homs to drink yerba mate',
             'adult_price' => 50,
             'child_price' => 50,
+            'period' => 20
         ]);
         $this->add_to_package_area($package1->id,[1,10],'Hotel');
         $this->add_to_package_area($package1->id,[1,10],'Region');

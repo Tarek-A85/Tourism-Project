@@ -19,28 +19,36 @@ class PackageController extends Controller
 {
     private function add_to_package_area($packageId, $visitable, $type)
     {
+        $period = null;
+        if ($visitable['period'] != 0)
+            $period = $visitable['period'];
+
         PackageArea::create([
             'package_id' => $packageId,
             'visitable_id' => $visitable['id'],
             'visitable_type' => $type,
-            'period' => $visitable['period']
+            'period' => $period
         ]);
     }
 
     private function update_package_area($packageId, $visitable, $type)
     {
+        $period = null;
+        if ($visitable['period'] != 0)
+            $period = $visitable['period'];
+
         PackageArea::where([
             ['package_id', '=', $packageId],
             ['visitable_id', '=', $visitable['id']],
             ['visitable_type', '=', $type]
         ])->first()->update([
-            'period' => $visitable['period']
+            'period' => $period
         ]);
     }
 
     public function index()
     {
-        $packages = Package::OrderBy('id', 'DESC')->get();
+        $packages = Package::latest()->filter(request(['search','type']))->OrderBy('id', 'DESC')->get();
         $packages->append(['countries', 'image']);
         $packages->setHidden(['package_areas', 'deleted_at', 'updated_at', 'created_at', 'description']);
         return $this->success('All packages', ['packages' => $packages]);
@@ -48,7 +56,7 @@ class PackageController extends Controller
 
     public function index_archived()
     {
-        $packages = Package::onlyTrashed()->select('id', 'name')->get();
+        $packages = Package::onlyTrashed()->latest()->filter(request(['search','type']))->select('id', 'name')->get();
         $packages->setHidden(['package_areas']);
         return $this->success('All archived packages', ['packages' => $packages]);
     }
@@ -56,9 +64,9 @@ class PackageController extends Controller
     public function show($id)
     {
         if (auth()->user()->is_admin)
-            $package = Package::withTrashed()->with('types:id,name','companies')->findOrFail($id);
+            $package = Package::withTrashed()->with(['types:id,name', 'companies','package_areas'])->findOrFail($id);
         else
-            $package = Package::with('types:id,name','companies')->findOrFail($id);
+            $package = Package::with(['types:id,name', 'companies','package_areas'])->findOrFail($id);
 
         $package->makeVisible('package_areas');
         $package->images = $package->images;
@@ -79,6 +87,7 @@ class PackageController extends Controller
             'description' => ['required'],
             'adult_price' => ['required', 'decimal:2'],
             'child_price' => ['required', 'decimal:2'],
+            'period' => ['required', 'numeric', 'gte:0'],
             'hotels' => ['array', 'nullable'],
             'hotels.*.id' => ['required', 'numeric', Rule::exists('hotels', 'id')],
             'hotels.*.period' => ['required', 'numeric'],
@@ -150,6 +159,7 @@ class PackageController extends Controller
         $validator = Validator::make($request->all(), [
             'name' => ['required', Rule::unique('packages', 'name')->where(fn ($query) => $query->where('id', '!=', $package->id))],
             'description' => ['required'],
+            'period' => ['required', 'numeric', 'gte:0'],
             'adult_price' => ['required', 'decimal:2'],
             'child_price' => ['required', 'decimal:2'],
             'deleted_hotels' => ['array', 'nullable'],
@@ -317,12 +327,13 @@ class PackageController extends Controller
     public function archive(Package $package)
     {
         // delete every tipe
-        // $trips = $package->trip_detail;
-        // foreach ($trips as $trip) {
-        //     if ($trip->date->date > now()) {
-        //         $trip->delete();
-        //     }
-        // }
+        $trips = $package->trip_detail;
+        if (!empty($trips))
+            foreach ($trips as $trip) {
+                if ($trip->date->date > now()) {
+                    $trip->delete();
+                }
+            }
 
         $package->delete();
         return $this->success('package is temporariy deleted successfully and all its tips is canclled');
@@ -336,23 +347,24 @@ class PackageController extends Controller
 
         return $this->success("Package $package->name restored");
     }
-
+    //update delete condition and add cancel tickets
     public function destroy($id)
     {
         $package = Package::withTrashed()->findOrFail($id);
 
-        // $trips = $package->trip_detail;
+        $trips = $package->trip_detail;
 
-        // if (empty($trips)) {
-        //     $oldestTrip = $trips->min('date')->date;
+        if (!empty($trips)) {
+            foreach ($trips as $trip) {
+                if ($trip->date->date < now() /*&&  have transaction*/)
+                    return $this->fail("You can't permenentaly delete this Package, it's used at some places");
+            }
 
-        //     if ($oldestTrip < now())
-        //         return $this->fail("You can't permenentaly delete this Package, it's used at some places");
-
-        //     foreach ($trips as $trip) {
-        //         $trip->delete();
-        //     }
-        // }
+            foreach ($trips as $trip) {
+                $trip->delete();
+                //cancel all tickets
+            }
+        }
 
         if (File::exists(storage_path("app/Packages/$package->name"))) {
             Folder::where([['name', '=', $package->name], ['folder_id', '=', 2]])->first()->delete();

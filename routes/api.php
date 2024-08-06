@@ -1,7 +1,5 @@
 <?php
 
-
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\{
     EmailVerificationController,
@@ -11,22 +9,29 @@ use App\Http\Controllers\Auth\{
     ForgotPasswordController,
 };
 use App\Http\Controllers\Both\{
+    CompanyController,
+    FlightController,
     RegionController,
     HotelController,
     PackageController,
     ReviewController,
-    FlightController,
-    CompanyController,
+    PackageTypeController,
+    TripController,
+    TrackingController
+
 };
 use App\Http\Controllers\User\{
     FavoriteController,
     WalletController
 };
 
+ 
 Route::post('google/signup', [GoogleController::class, 'sign_up'])->name('google_sign_up');
 Route::post('google/signin', [GoogleController::class, 'sign_in'])->name('google_sign_in');
 Route::post('/singup', [AuthenticatedController::class, 'singup']);
 Route::post('/login', [AuthenticatedController::class, 'login']);
+
+
 
 
 
@@ -58,14 +63,13 @@ Route::middleware(['auth:sanctum'])->group(function () {
             Route::put('update/reviews/{review}', [ReviewController::class, 'update_review']);
             Route::put('update/rating/{review}', [ReviewController::class, 'update_rating']);
 
+
             Route::prefix('/wallet')->group(function () {
                 Route::post('/create', [WalletController::class, 'create'])->name('create_wallet');
                 Route::get('/send/resetting/code', [ResetPasswordController::class, 'send_code'])->name('send_resetting_code')->middleware('throttle:resetting_code');
                 Route::post('/validate/resetting/code', [ResetPasswordController::class, 'validate_code'])->name('validate_resetting_code');
                 Route::post('/reset/password', [WalletController::class, 'restePassword'])->name('reset_wallet_password');
             });
-
-           
         });
         
         Route::apiResource('companies', CompanyController::class)->only(['index', 'show']);
@@ -85,7 +89,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
             Route::post('/reset/password', [ResetPasswordController::class, 'reset_password'])->name('reset_password');
         });
 
-        Route::prefix('admin')->middleware('check_admin')->group(function(){
+        Route::prefix('admin')->middleware('check_admin')->group(function () {
             Route::delete('regions/archive/{region}', [RegionController::class, 'archive']);
             Route::get('regions/archived', [RegionController::class, 'index_archived']);
             Route::get('regions/show/archived/{id}', [RegionController::class, 'show_archived']);
@@ -97,21 +101,27 @@ Route::middleware(['auth:sanctum'])->group(function () {
             Route::get('hotels/restore/archived/{id}', [HotelController::class, 'restore_archived']);
             Route::apiResource('hotels', HotelController::class)->only(['store', 'update', 'destroy']);
 
-            Route::apiResource('package',PackageController::class)->only(['store','update','destroy']);
-            Route::delete('package/archive/{package}',[PackageController::class,'archive']);
-            Route::get('package/archived',[PackageController::class,'index_archived']);
-            Route::get('package/restore/archived/{id}',[PackageController::class,'restore_archived']);
+            Route::apiResource('package', PackageController::class)->only(['store', 'update', 'destroy']);
+            Route::delete('package/archive/{package}', [PackageController::class, 'archive']);
+            Route::get('package/archived', [PackageController::class, 'index_archived']);
+            Route::get('package/restore/archived/{id}', [PackageController::class, 'restore_archived']);
+            Route::apiResource('package/trip', TripController::class)->only(['store', 'update', 'destroy']);
 
             Route::get('companies/restore/archived/{id}', [CompanyController::class, 'restore']);
             Route::get('companies/archived', [CompanyController::class, 'index_archived']);
             Route::delete('companies/archive/{company}', [CompanyController::class, 'archive']);
             Route::apiResource('companies', CompanyController::class)->only(['store', 'update', 'destroy']);
+
+            Route::post('trip/tracking/{trip}', [TrackingController::class, 'update']);
         });
-      
-        Route::delete('/logout',[AuthenticatedController::class,'logout']);
+
+        Route::delete('/logout', [AuthenticatedController::class, 'logout']);
         Route::apiResource('regions', RegionController::class)->only(['index', 'show']);
         Route::apiResource('hotels', HotelController::class)->only(['index', 'show']);
-        Route::apiResource('package',PackageController::class)->only(['index','show']);
-     });
-   
+        Route::apiResource('package', PackageController::class)->only(['index', 'show']);
+        Route::get('packageTypes', PackageTypeController::class);
+        Route::get('package/trip/{package}', [TripController::class, 'index']);
+        //check transaction
+        Route::get('trip/tracking/{trip}', [TrackingController::class, 'tracking']);
+    });
 });
