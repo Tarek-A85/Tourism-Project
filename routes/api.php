@@ -13,7 +13,10 @@ use App\Http\Controllers\Auth\{
 use App\Http\Controllers\Both\{
     RegionController,
     HotelController,
-    PackageController
+    PackageController,
+    ReviewController,
+    FlightController,
+    CompanyController,
 };
 use App\Http\Controllers\User\{
     FavoriteController,
@@ -26,7 +29,7 @@ Route::post('/singup', [AuthenticatedController::class, 'singup']);
 Route::post('/login', [AuthenticatedController::class, 'login']);
 
 
-Route::get('test', [FlightController::class, 'test']);
+
 
 
 Route::middleware('check_email')->group(function () {
@@ -40,6 +43,9 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::post('/code/validation', [EmailVerificationController::class, 'verification_code_validation'])->name('code_validation');
     Route::get('/resend/verification/code', [EmailVerificationController::class, 'resend_verification_code'])->name('resend_code')->middleware('throttle:resend_verification_code');
 
+
+
+    
     Route::middleware('verified')->group(function () {
 
         Route::middleware('is_user')->group(function () {
@@ -47,6 +53,10 @@ Route::middleware(['auth:sanctum'])->group(function () {
             Route::delete('favorite',[FavoriteController::class,'destroy']);
             Route::post('favorite/add/item',[FavoriteController::class,'add_to_list']);
             Route::post('favorite/remvoe/item',[FavoriteController::class,'remove_from_list']);
+            Route::post('add/review', [ReviewController::class, 'store_review']);
+            Route::post('add/rating', [ReviewController::class, 'store_rating']);
+            Route::put('update/reviews/{review}', [ReviewController::class, 'update_review']);
+            Route::put('update/rating/{review}', [ReviewController::class, 'update_rating']);
 
             Route::prefix('/wallet')->group(function () {
                 Route::post('/create', [WalletController::class, 'create'])->name('create_wallet');
@@ -57,8 +67,15 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
            
         });
-
+        
+        Route::apiResource('companies', CompanyController::class)->only(['index', 'show']);
         Route::post('flights/search', [FlightController::class, 'search']);
+        Route::post('reviews/{id}', [ReviewController::class, 'index']);
+        Route::get('can/review/{id}', [ReviewController::class, 'can_review_package']);
+        Route::get('reviews/{review}', [ReviewController::class, 'show']);
+        Route::delete('reviews/{review}', [ReviewController::class, 'destroy_review']);
+        Route::delete('rating/{review}', [ReviewController::class, 'destroy_rating']);
+
 
 
         Route::middleware('can_change_password')->group(function () {

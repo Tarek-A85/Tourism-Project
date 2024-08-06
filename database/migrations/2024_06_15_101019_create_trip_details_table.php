@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->morphs('detailable');
             $table->foreignId('date_id')->constrained();
-            $table->timestamp('time');
+            $table->time('time');
             $table->unsignedInteger('num_of_tickets');
             $table->unsignedInteger('available_tickets');
             $table->timestamps();

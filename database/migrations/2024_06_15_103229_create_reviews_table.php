@@ -15,9 +15,9 @@ return new class extends Migration
             $table->id();
             $table->foreignId('user_id')->constrained();
             $table->morphs('reviewable');
-            $table->string('title');
-            $table->text('description');
-            $table->decimal('stars', 5, 2);
+            $table->string('title')->nullable();
+            $table->text('description')->nullable();
+            $table->integer('stars')->nullable();
             $table->timestamps();
         });
     }

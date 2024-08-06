@@ -21,5 +21,15 @@ class Wallet extends Model
         return $this->hasMany(Transaction::class);
     }
 
+    public function package_transactions(){
+        
+        return $this->hasManyThrough(PackageTransaction::class, Transaction::class);
+    }
+
+    public function completed_package_transactions(){
+        
+        return $this->hasManyThrough(PackageTransaction::class, Transaction::class)->where('status_id', Status::where('name', 'Completed')->first()->id);
+    }
+
 
 }

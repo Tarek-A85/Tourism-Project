@@ -63,14 +63,21 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->hasMany(favoriteList::class);
     }
 
-    public function photo()
-    {
-        return $this->morphOne(photo::class, 'photoable');
-    }
-
     public function reviews(){
 
         return $this->hasMany(Review::class);
+    }
+
+    public function getImageAttribute(){
+
+        $parent = Folder::where('name', 'Users')->first();
+
+        $image = Folder::where('name', 'user ' . $this->id)->where('folder_id', $parent->id)->first();
+        if($image)
+        $image = $image->images;
+
+        return $image;
+
     }
     
    

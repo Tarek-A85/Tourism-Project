@@ -41,5 +41,10 @@ class FolderSeeder extends Seeder
             'name' => 'Companies',
             'folder_id' => null,
         ]);
+
+        Folder::create([
+            'name' => 'Reviews',
+            'folder_id' => null,
+        ]);
     }
 }

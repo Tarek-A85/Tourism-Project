@@ -16,6 +16,8 @@ class DatabaseSeeder extends Seeder
         // User::factory(10)->create();
         $this->call(AdminSeeder::class);
 
+        $this->call(UserSeeder::class);
+
         $this->call(FolderSeeder::class);
 
         $this->call(FlightTypeSeeder::class);
@@ -33,6 +35,8 @@ class DatabaseSeeder extends Seeder
         $this->call(PackageTypeSeeder::class);
 
         $this->call(PackageSeeder::class);
+
+        $this->call(TransactionTypeSeeder::class);
 
         
 

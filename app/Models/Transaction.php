@@ -28,16 +28,16 @@ class Transaction extends Model
 
     public function hotel_transactions(){
 
-        return $this->hasMany(HotelTransaction::class);
+        return $this->hasOne(HotelTransaction::class);
     }
 
     public function package_transactions()
     {
-        return $this->hasMany(PackageTransaction::class);
+        return $this->hasOne(PackageTransaction::class);
     }
 
     public function flight_transactions()
     {
-        return $this->hasMany(FlightTransaction::class);
+        return $this->hasOne(FlightTransaction::class);
     }
 }
