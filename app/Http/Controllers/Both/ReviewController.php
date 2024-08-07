@@ -22,13 +22,11 @@ class ReviewController extends Controller
 
     public function can_review_package(String $id){
 
-            //$detail = TripDetail::where('id', $id)->where('deleted_at', null)->firstOrFail();
-
             $detail = TripDetail::findOrFail($id);
 
             $wallet = auth()->user()->wallet;
 
-            $package = Package::findOrFail($detail->detailable_id);
+            $package = $detail->package;
  
             if(!$wallet){
              return $this->fail('You have to complete the trip provided by the package to review it');
@@ -76,8 +74,7 @@ class ReviewController extends Controller
     public function store_rating(Request $request){
 
         $validator = Validator::make($request->all(), [
-            //'trip_detail_id' => ['required', Rule::exists('trip_details', 'id')->where(fn ($query) => $query->where('deleted_at', null))],
-            'trip_detail_id' => ['required', 'exists:trip_details,id'],
+            'trip_detail_id' => ['required', 'exists:package_details,id'],
             'stars' => ['required', 'numeric', 'min:0', 'max:5'],
         ]);
 
@@ -87,9 +84,19 @@ class ReviewController extends Controller
 
         $detail = TripDetail::findOrFail($request->trip_detail_id);
 
-        $package = Package::findOrFail($detail->detailable_id);
+        $package = $detail->package;
 
-       
+        $wallet = auth()->user()->wallet;
+
+        $package_transactions = $wallet->completed_package_transactions;
+             
+        if($package_transactions->count() == 0)
+        return $this->fail('You have to complete the trip provided by the package to review it');
+
+
+        if($package_transactions->where('trip_detail_id', $detail->id)->count() == 0){
+            return $this->fail('You have to complete the trip provided by the package to review it');
+        }
 
         if(Review::where('user_id', auth()->user()->id)->where('reviewable_type', 'Package')->where('reviewable_id', $package->id)->first()){
             return $this->fail("You rated this package before");
@@ -126,14 +133,28 @@ class ReviewController extends Controller
 
         $id = $request->id;
 
-        if($request->type == 'Pacakge'){
+        if($request->type == 'Package'){
 
             $detail = TripDetail::findOrFail($request->id);
 
-            $id = Package::findOrFail($detail->detailable_id);
+            $id = $detail->package->id;
+
+            $wallet = auth()->user()->wallet;
+
+            $package_transactions = $wallet->completed_package_transactions;
+             
+            if($package_transactions->count() == 0)
+            return $this->fail('You have to complete the trip provided by the package to review it');
+
+
+            if($package_transactions->where('trip_detail_id', $detail->id)->count() == 0){
+                return $this->fail('You have to complete the trip provided by the package to review it');
+            }
         }
 
      $old_review = Review::where('reviewable_type', $request->type)->where('reviewable_id', $id)->where('user_id', auth()->user()->id)->first();
+
+     
 
        if($request->type == 'Package' && $old_review == null ){
         return $this->fail("Please give this package a rate before you write the review");
@@ -314,7 +335,7 @@ class ReviewController extends Controller
 
     public function destroy_rating(Review $review){
 
-        if(!auth()->user()->is_admin && $review->user_id != auth()->user()->id){
+        if($review->user_id != auth()->user()->id){
             return $this->fail('You are not authorized');
         }
 

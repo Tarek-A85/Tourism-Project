@@ -13,7 +13,7 @@ class Package extends Model
 
     protected $guarded = ['id'];
     protected $hidden = ['package_areas'];
-    protected $appends = ['image'];
+    protected $appends = ['image', 'rating'];
 
     public function scopeFilter($query, $filters)
     {
@@ -64,6 +64,13 @@ class Package extends Model
             }
         }
         return $countries;
+    }
+
+    public function getRatingAttribute(){
+
+        $avg = Review::where('reviewable_type', 'Package')->where('reviewable_id', $this->id)->avg('stars');
+        
+        return round($avg);
     }
 
     public function favorite()

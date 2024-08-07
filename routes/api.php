@@ -36,7 +36,6 @@ Route::post('/login', [AuthenticatedController::class, 'login']);
 
 
 
-
 Route::middleware('check_email')->group(function () {
     Route::post('/send/forgotten/password/code', [ForgotPasswordController::class, 'send_forgotten_password_code'])->name('send_forgotten_password_code')->middleware('throttle:forgot_password_code');
     Route::post('/validate/forgotten/password/code', [ForgotPasswordController::class, 'validate_forgotten_password_code'])->name('validate_forgotten_password_code');
