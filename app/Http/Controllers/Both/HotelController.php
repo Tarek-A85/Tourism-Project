@@ -287,4 +287,17 @@ class HotelController extends Controller
 
         return $this->success("Hotel restored");
     }
+
+    public function search(){
+
+        $hotels = Hotel::with('region:id,name,region_id,deleted_at')->get();
+
+        $hotels = $hotels->makeHidden(['description', 'region_id']);
+
+        foreach($hotels as $hotel){
+            $hotel->image = $hotel->images[0];
+        }
+
+        return $this->success('All hotels with regions', ["hotels" => $hotels]);
+    }
 }

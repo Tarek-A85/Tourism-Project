@@ -34,8 +34,6 @@ Route::post('/login', [AuthenticatedController::class, 'login']);
 
 
 
-
-
 Route::middleware('check_email')->group(function () {
     Route::post('/send/forgotten/password/code', [ForgotPasswordController::class, 'send_forgotten_password_code'])->name('send_forgotten_password_code')->middleware('throttle:forgot_password_code');
     Route::post('/validate/forgotten/password/code', [ForgotPasswordController::class, 'validate_forgotten_password_code'])->name('validate_forgotten_password_code');
@@ -78,6 +76,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::get('reviews/{review}', [ReviewController::class, 'show']);
         Route::delete('reviews/{review}', [ReviewController::class, 'destroy_review']);
         Route::delete('rating/{review}', [ReviewController::class, 'destroy_rating']);
+        Route::get('search/hotels', [HotelController::class, 'search']);
 
 
 

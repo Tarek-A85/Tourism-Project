@@ -36,5 +36,7 @@ class Review extends Model
 
        return $image;
     }
+
+    
 }
  

@@ -13,6 +13,8 @@ class Hotel extends Model
 
     protected $fillable = ['name', 'region_id', 'stars', 'description', 'price_per_room'];
 
+    protected $hidden = ['created_at', 'updated_at'];
+
     public function region(){
 
         return $this->belongsTo(Region::class, 'region_id')->withTrashed()->with(['country' => function($query){

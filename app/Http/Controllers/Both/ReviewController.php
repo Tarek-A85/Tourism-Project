@@ -68,7 +68,9 @@ class ReviewController extends Controller
             $review->user->image = $review->user->image;
         }
 
-        return $this->success("All reviews", ["reviews" => $reviews]);
+        return $this->success("All reviews", ['counter' => $reviews->count(),
+        'reviews' => $reviews,
+         ]);
     }
 
     public function store_rating(Request $request){

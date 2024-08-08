@@ -68,9 +68,17 @@ class Package extends Model
 
     public function getRatingAttribute(){
 
-        $avg = Review::where('reviewable_type', 'Package')->where('reviewable_id', $this->id)->avg('stars');
+        $ratings = Review::where('reviewable_type', 'Package')->where('reviewable_id', $this->id)->where('stars', '!=', null);
+
+        $rating['stars'] = round($ratings->avg('stars'));
+
+        $rating['people_number'] = $ratings->count();
+
+        if($rating['people_number'] == 0){
+            $rating = null;
+        }
         
-        return round($avg);
+        return $rating;
     }
 
     public function favorite()
