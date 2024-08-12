@@ -93,6 +93,12 @@ class RegionController extends Controller
             $father = Folder::where('name', $region->name)->where('folder_id', 1)->first();
         }
 
+        if($region->cities){
+            foreach($region->cities as $city){
+                $city->image = $city->images[0];
+            }
+        }
+
        $region->images = Folder::where('folder_id', $father->id)->where('name', $region->name)->first()->images;
 
        return $this->success("Region info", ['region' => $region]);
