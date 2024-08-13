@@ -54,6 +54,7 @@ class Hotel extends Model
     }
 
     public function hotel_transactions(){
+        
         return $this->hasMany(HotelTransaction::class);
     }
 

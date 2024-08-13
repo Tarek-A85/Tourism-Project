@@ -17,7 +17,8 @@ return new class extends Migration
             $table->foreignId('transaction_type_id')->constrained('transaction_types');
             $table->foreignId('status_id')->constrained('statuses');
             $table->decimal('price', 12, 2);
-            $table->boolean('paid')->default(0);
+            $table->string('name')->nullable();
+            $table->string('email')->nullable();
             $table->timestamps();
         });
     }

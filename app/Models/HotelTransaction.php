@@ -21,8 +21,13 @@ class HotelTransaction extends Model
         return $this->belongsTo(Transaction::class);
     }
 
-    public function date(){
+    public function staying_date(){
 
-        return $this->belongsTo(Date::class);
+        return $this->belongsTo(Date::class, 'staying_date_id')->select('id', 'date');
+    }
+
+    public function departure_date(){
+
+        return $this->belongsTo(Date::class, 'departure_date_id')->select('id', 'date');
     }
 }

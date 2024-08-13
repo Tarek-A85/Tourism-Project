@@ -17,7 +17,9 @@ use App\Http\Controllers\Both\{
     ReviewController,
     PackageTypeController,
     TripController,
-    TrackingController
+    TrackingController,
+    HotelTransactionController,
+    TransactionController,
 
 };
 use App\Http\Controllers\User\{
@@ -31,7 +33,7 @@ Route::post('google/signin', [GoogleController::class, 'sign_in'])->name('google
 Route::post('/singup', [AuthenticatedController::class, 'singup']);
 Route::post('/login', [AuthenticatedController::class, 'login']);
 
-
+Route::get('transaction/{id}', [TransactionController::class, 'show']);
 
 
 Route::middleware('check_email')->group(function () {
@@ -59,6 +61,12 @@ Route::middleware(['auth:sanctum'])->group(function () {
             Route::post('add/rating', [ReviewController::class, 'store_rating']);
             Route::put('update/reviews/{review}', [ReviewController::class, 'update_review']);
             Route::put('update/rating/{review}', [ReviewController::class, 'update_rating']);
+            Route::post('check/availablity', [HotelTransactionController::class, 'check_availablity']);
+            Route::post('add/hotel/transaction', [HotelTransactionController::class, 'store']);
+            Route::put('update/hotel/transaction/{id}', [HotelTransactionController::class, 'update']);
+            Route::post('delete/hotel/transaction/{id}', [HotelTransactionController::class, 'destroy']);
+            Route::get('all/transactions', [TransactionController::class, 'index']);
+            Route::get('transactions/{id}', [TransactionController::class, 'show']);
 
 
             Route::prefix('/wallet')->group(function () {
@@ -77,6 +85,8 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::delete('reviews/{review}', [ReviewController::class, 'destroy_review']);
         Route::delete('rating/{review}', [ReviewController::class, 'destroy_rating']);
         Route::get('search/hotels', [HotelController::class, 'search']);
+        Route::get('show/hotel/transaction/{id}', [HotelTransactionController::class, 'show']);
+
 
 
 
@@ -111,6 +121,9 @@ Route::middleware(['auth:sanctum'])->group(function () {
             Route::apiResource('companies', CompanyController::class)->only(['store', 'update', 'destroy']);
 
             Route::post('trip/tracking/{trip}', [TrackingController::class, 'update']);
+
+
+           
         });
 
         Route::delete('/logout', [AuthenticatedController::class, 'logout']);

@@ -7,6 +7,7 @@ use App\Models\Flight;
 use App\Models\Company;
 use App\Models\Date;
 use App\Models\Airport;
+use App\Models\Transaction;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Collection;
@@ -95,6 +96,8 @@ use Illuminate\Support\Collection;
 
         return $array;
     }
+
+    
 
     
 

@@ -13,9 +13,9 @@ class DateSeeder extends Seeder
      */
     public function run(): void
     {
-        $currentDate = Carbon::now();
+        $currentDate = Carbon::now()->subYears(2);
 
-        for ($i = 0; $i < 365 * 2; $i++) {
+        for ($i = 0; $i < 365 ; $i++) {
            
           Date::create([
                 'date' => $currentDate->toDateString()
