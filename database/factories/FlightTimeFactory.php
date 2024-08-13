@@ -19,7 +19,7 @@ class FlightTimeFactory extends Factory
     {
         return [
             'flight_id' => Flight::get()->random()->id,
-            'date_id' => Date::where('date', '>=', now())->get()->random()->id,
+            'date_id' => Date::where('date', '>=', now()->toDateString())->get()->random()->id,
             'time' => fake()->time(),
            
         ];
