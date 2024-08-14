@@ -278,7 +278,7 @@ class HotelTransactionController extends Controller
             ]);
         }
 
-        if((!$request->email && $transacation->email) || ($request->email && $request->email != $transaction->email)){
+        if((!$request->email && $transaction->email) || ($request->email && $request->email != $transaction->email)){
 
             Mail::to($transaction->email)->send(new CancelledBookingMail($hotel->name, $transaction->id));
         }

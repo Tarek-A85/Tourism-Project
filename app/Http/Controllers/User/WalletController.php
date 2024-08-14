@@ -14,6 +14,13 @@ use Illuminate\Support\Str;
 
 class WalletController extends Controller
 {
+    public function show()
+    {
+        $wallet = auth()->user()->wallet;
+        $wallet->setHidden(['password','user_id']);
+        return $this->success('your wallet information',$wallet);
+    }
+
     public function create(Request $request)
     {
         

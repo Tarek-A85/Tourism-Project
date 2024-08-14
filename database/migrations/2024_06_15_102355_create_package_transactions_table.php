@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('package_transactions', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('transaction_id')->constrained();
+            $table->foreignId('transaction_id')->constrained()->cascadeOnDelete();
             $table->foreignId('trip_detail_id')->constrained('package_details');
             $table->unsignedInteger('children_number');
             $table->unsignedBigInteger('children_total_price');
