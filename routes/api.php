@@ -9,6 +9,7 @@ use App\Http\Controllers\Auth\{
     ForgotPasswordController,
 };
 use App\Http\Controllers\Both\{
+    AirportController,
     CompanyController,
     FlightController,
     FlightTransactionController,
@@ -100,6 +101,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::get('search/hotels', [HotelController::class, 'search']);
         Route::get('show/hotel/transaction/{id}', [HotelTransactionController::class, 'show']);
         Route::get('show/flight/transaction/{id}', [FlightTransactionController::class, 'show']);
+        Route::get('airport', [AirportController::class, 'index']);
 
 
 
