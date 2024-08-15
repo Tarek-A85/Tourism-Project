@@ -73,7 +73,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
                 Route::post('/package/transaction', [PackageTransactionController::class, 'store']);
                 Route::put('/package/transaction/{packageTransaction}', [PackageTransactionController::class, 'update']);
                 Route::delete('/package/transaction/{packageTransaction}', [PackageTransactionController::class, 'destroy']);
-                Route::get('/package/transaction/{packageTransaction}', [PackageTransactionController::class, 'show']);
+                Route::get('/package/transaction/{transaction}', [PackageTransactionController::class, 'show']);
 
                 Route::post('add/flight/transaction', [FlightTransactionController::class, 'store']);
                 Route::post('available/updates/for/flight/transaction/{id}', [FlightTransactionController::class, 'available_flights_to_update']);

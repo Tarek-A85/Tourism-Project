@@ -282,9 +282,9 @@ class PackageTransactionController extends Controller
 
     }
 
-    public function show(PackageTransaction $packageTransaction)
+    public function show(Transaction $transaction)
     {
-        $transaction = $packageTransaction->transaction;
+        $packageTransaction = $transaction->package_transactions;
         
         $data=[];
         $data['package'] = $packageTransaction->tripDetail->package->only('id','name');
