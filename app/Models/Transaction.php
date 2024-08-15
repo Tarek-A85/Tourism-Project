@@ -38,6 +38,6 @@ class Transaction extends Model
 
     public function flight_transactions()
     {
-        return $this->hasOne(FlightTransaction::class);
+        return $this->hasMany(FlightTransaction::class);
     }
 }

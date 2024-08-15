@@ -9,7 +9,13 @@ use App\Models\Flight;
 use App\Models\FlightTime;
 use App\Models\FlightDetail;
 use App\Models\FlightType;
+use App\Models\Transaction;
+use App\Models\HotelTransaction;
+use App\Models\TransactionType;
+use App\Models\Status;
 use Carbon\Carbon;
+use Psy\Readline\Transient;
+
 Artisan::command('inspire', function () {
     $this->comment(Inspiring::quote());
 })->purpose('Display an inspiring quote')->hourly();
@@ -71,5 +77,73 @@ Artisan::command('add_flight_trips', function (){
     }
 
 })->everySecond();
+
+Artisan::command('change_hotel_transaction_status', function(){
+
+    $transactions = Transaction::where('transaction_type_id', TransactionType::where('name', 'Hotel')->first()->id)->get();
+
+    foreach($transactions as $transaction){
+
+        $hotel_transaction = $transaction->hotel_transactions;
+
+        if($hotel_transaction->staying_date->date >= now()->toDateString() ){
+
+            if($hotel_transaction->departure_date->date > now()->toDateString()){
+
+            $transaction->update([
+                'status_id' => Status::where('name', 'In progress')->first()->id,
+            ]);
+        }
+        else if($hotel_transaction->departure_date->date < now()->toDateString()){
+
+            $transaction->update([
+                'status_id' => Status::where('name', 'Completed')->first()->id,
+            ]);
+        }
+        } 
+    }
+});
+
+Artisan::command('change_flight_transaction_status', function(){
+
+    $transactions = Transaction::where('transaction_type_id', TransactionType::where('name', 'Flight')->first()->id)->get();
+
+    foreach($transactions as $transaction){
+
+        $flight_transactions = $transaction->flight_transactions;
+
+        $going_detail = $flight_transactions[0]->flight_details;
+
+        $going_time = $going_detail->flight_time;
+
+        if($flight_transactions->count() > 1){
+            $return_detail = $flight_transactions[1]->flight_details;
+
+            $return_time = $return_detail->flight_time;
+        }
+
+       if($going_time->date->date == now()->toDateString()){
+
+        if($going_time->time <=now()->toTimeString()){
+            $transaction->update([
+                'status_id' => Status::where('name', 'In progress')->first()->id,
+            ]);
+        }
+       }
+
+       else if($going_time->date->date < now()->toDateString()){
+
+        if($return_time && $return_time->date->date < now()->toDateString()){
+            
+            $transaction->update([
+                'status_id' => Status::where('name', 'Completed')->first()->id,
+            ]);
+           
+        }
+       }
+    }
+
+
+});
 
 

@@ -151,9 +151,13 @@ class HotelTransactionController extends Controller
     public function show(String $id)
     {
 
-        $just_to_find = HotelTransaction::findOrFail($id);
+        $just_to_find = Transaction::findOrFail($id)->hotel_transactions;
 
-        $just_to_find->load('hotel', 'staying_date', 'departure_date');
+        if($just_to_find->count() == 0){
+            return $this->fail('There is no object like that');
+        }
+
+        // $just_to_find->load('hotel', 'staying_date', 'departure_date');
 
         $hotel = $just_to_find->hotel->only('id', 'name');
 
@@ -278,7 +282,7 @@ class HotelTransactionController extends Controller
             ]);
         }
 
-        if((!$request->email && $transacation->email) || ($request->email && $request->email != $transaction->email)){
+        if((!$request->email && $transaction->email) || ($request->email && $request->email != $transaction->email)){
 
             Mail::to($transaction->email)->send(new CancelledBookingMail($hotel->name, $transaction->id));
         }

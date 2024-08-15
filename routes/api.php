@@ -11,6 +11,7 @@ use App\Http\Controllers\Auth\{
 use App\Http\Controllers\Both\{
     CompanyController,
     FlightController,
+    FlightTransactionController,
     RegionController,
     HotelController,
     PackageController,
@@ -33,7 +34,7 @@ Route::post('google/signin', [GoogleController::class, 'sign_in'])->name('google
 Route::post('/singup', [AuthenticatedController::class, 'singup']);
 Route::post('/login', [AuthenticatedController::class, 'login']);
 
-Route::get('transaction/{id}', [TransactionController::class, 'show']);
+
 
 
 Route::middleware('check_email')->group(function () {
@@ -62,9 +63,19 @@ Route::middleware(['auth:sanctum'])->group(function () {
             Route::put('update/reviews/{review}', [ReviewController::class, 'update_review']);
             Route::put('update/rating/{review}', [ReviewController::class, 'update_rating']);
             Route::post('check/availablity', [HotelTransactionController::class, 'check_availablity']);
-            Route::post('add/hotel/transaction', [HotelTransactionController::class, 'store']);
-            Route::put('update/hotel/transaction/{id}', [HotelTransactionController::class, 'update']);
-            Route::post('delete/hotel/transaction/{id}', [HotelTransactionController::class, 'destroy']);
+            
+           
+
+            Route::middleware('check_wallet')->group(function(){
+                Route::post('add/hotel/transaction', [HotelTransactionController::class, 'store']);
+                Route::put('update/hotel/transaction/{id}', [HotelTransactionController::class, 'update']);
+                Route::post('delete/hotel/transaction/{id}', [HotelTransactionController::class, 'destroy']);
+                Route::post('add/flight/transaction', [FlightTransactionController::class, 'store']);
+                Route::post('available/updates/for/flight/transaction/{id}', [FlightTransactionController::class, 'available_flights_to_update']);
+                Route::post('update/flight/transaction/{id}', [FlightTransactionController::class, 'update']);
+                Route::post('delete/flight/transaction/{id}', [FlightTransactionController::class, 'destroy']);
+            });
+         
             Route::get('all/transactions', [TransactionController::class, 'index']);
             Route::get('transactions/{id}', [TransactionController::class, 'show']);
 
@@ -86,6 +97,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::delete('rating/{review}', [ReviewController::class, 'destroy_rating']);
         Route::get('search/hotels', [HotelController::class, 'search']);
         Route::get('show/hotel/transaction/{id}', [HotelTransactionController::class, 'show']);
+        Route::get('show/flight/transaction/{id}', [FlightTransactionController::class, 'show']);
 
 
 

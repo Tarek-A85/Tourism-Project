@@ -2,7 +2,7 @@
 
 namespace App\Models;
 
-use Faker\Provider\ar_EG\Company;
+//use Faker\Provider\ar_EG\Company;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -14,7 +14,7 @@ class Flight extends Model
 
     public function company()
     {
-        return $this->belongsTo(Company::class);
+        return $this->belongsTo(Company::class, 'company_id');
     }
 
     public function starting_airport()
@@ -24,7 +24,7 @@ class Flight extends Model
 
     public function ending_airport(){
 
-        return $this->belongsTo(Region::class, 'end_airport_id');
+        return $this->belongsTo(Airport::class, 'end_airport_id');
     }
 
     public function flight_times()

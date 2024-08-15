@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('flight_transactions', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('transaction_id')->constrained();
+            $table->foreignId('transaction_id')->constrained()->cascadeOnDelete();
             $table->foreignId('flight_detail_id')->constrained('flight_details');
             $table->foreignId('flight_type_id')->constrained();
             $table->unsignedInteger('children_number');

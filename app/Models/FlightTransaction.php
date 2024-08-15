@@ -21,10 +21,10 @@ class FlightTransaction extends Model
         return $this->belongsTo(Transaction::class);
     }
 
-    public function tripDetail()
-    {
-        return $this->belongsTo(TripDetail::class);
-    }
+    // public function tripDetail()
+    // {
+    //     return $this->belongsTo(TripDetail::class);
+    // }
 
     public function flight_details(){
         return $this->belongsTo(FlightDetail::class, 'flight_detail_id');
