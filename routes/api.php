@@ -21,21 +21,18 @@ use App\Http\Controllers\Both\{
     TrackingController,
     HotelTransactionController,
     TransactionController,
-
 };
 use App\Http\Controllers\User\{
     FavoriteController,
+    PackageTransactionController,
     WalletController
 };
 
- 
+
 Route::post('google/signup', [GoogleController::class, 'sign_up'])->name('google_sign_up');
 Route::post('google/signin', [GoogleController::class, 'sign_in'])->name('google_sign_in');
 Route::post('/singup', [AuthenticatedController::class, 'singup']);
 Route::post('/login', [AuthenticatedController::class, 'login']);
-
-
-
 
 Route::middleware('check_email')->group(function () {
     Route::post('/send/forgotten/password/code', [ForgotPasswordController::class, 'send_forgotten_password_code'])->name('send_forgotten_password_code')->middleware('throttle:forgot_password_code');
@@ -50,44 +47,49 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
 
 
-    
+
     Route::middleware('verified')->group(function () {
 
         Route::middleware('is_user')->group(function () {
-            Route::apiResource('favorite',FavoriteController::class)->except(['edite','create','destroy']);
-            Route::delete('favorite',[FavoriteController::class,'destroy']);
-            Route::post('favorite/add/item',[FavoriteController::class,'add_to_list']);
-            Route::post('favorite/remvoe/item',[FavoriteController::class,'remove_from_list']);
+            Route::apiResource('favorite', FavoriteController::class)->except(['edite', 'create', 'destroy']);
+            Route::delete('favorite', [FavoriteController::class, 'destroy']);
+            Route::post('favorite/add/item', [FavoriteController::class, 'add_to_list']);
+            Route::post('favorite/remvoe/item', [FavoriteController::class, 'remove_from_list']);
             Route::post('add/review', [ReviewController::class, 'store_review']);
             Route::post('add/rating', [ReviewController::class, 'store_rating']);
             Route::put('update/reviews/{review}', [ReviewController::class, 'update_review']);
             Route::put('update/rating/{review}', [ReviewController::class, 'update_rating']);
-            Route::post('check/availablity', [HotelTransactionController::class, 'check_availablity']);
-            
-           
 
-            Route::middleware('check_wallet')->group(function(){
+            Route::middleware('has_wallet')->group(function () {
+                Route::post('check/availablity', [HotelTransactionController::class, 'check_availablity']);
                 Route::post('add/hotel/transaction', [HotelTransactionController::class, 'store']);
                 Route::put('update/hotel/transaction/{id}', [HotelTransactionController::class, 'update']);
                 Route::post('delete/hotel/transaction/{id}', [HotelTransactionController::class, 'destroy']);
+                Route::get('all/transactions', [TransactionController::class, 'index']);
+                Route::get('transactions/{id}', [TransactionController::class, 'show']);
+
+                Route::post('/package/transaction', [PackageTransactionController::class, 'store']);
+                Route::put('/package/transaction/{packageTransaction}', [PackageTransactionController::class, 'update']);
+                Route::delete('/package/transaction/{packageTransaction}', [PackageTransactionController::class, 'destroy']);
+                Route::get('/package/transaction/{packageTransaction}',[PackageTransactionController::class,'show']);
+
                 Route::post('add/flight/transaction', [FlightTransactionController::class, 'store']);
                 Route::post('available/updates/for/flight/transaction/{id}', [FlightTransactionController::class, 'available_flights_to_update']);
                 Route::post('update/flight/transaction/{id}', [FlightTransactionController::class, 'update']);
                 Route::post('delete/flight/transaction/{id}', [FlightTransactionController::class, 'destroy']);
             });
-         
-            Route::get('all/transactions', [TransactionController::class, 'index']);
-            Route::get('transactions/{id}', [TransactionController::class, 'show']);
-
 
             Route::prefix('/wallet')->group(function () {
+                Route::middleware('has_wallet')->group(function () {
+                    Route::get('/', [WalletController::class, 'show']);
+                    Route::get('/send/resetting/code', [ResetPasswordController::class, 'send_code'])->name('send_resetting_code')->middleware('throttle:resetting_code');
+                    Route::post('/validate/resetting/code', [ResetPasswordController::class, 'validate_code'])->name('validate_resetting_code');
+                    Route::post('/reset/password', [WalletController::class, 'restePassword'])->name('reset_wallet_password');
+                });
                 Route::post('/create', [WalletController::class, 'create'])->name('create_wallet');
-                Route::get('/send/resetting/code', [ResetPasswordController::class, 'send_code'])->name('send_resetting_code')->middleware('throttle:resetting_code');
-                Route::post('/validate/resetting/code', [ResetPasswordController::class, 'validate_code'])->name('validate_resetting_code');
-                Route::post('/reset/password', [WalletController::class, 'restePassword'])->name('reset_wallet_password');
             });
         });
-        
+
         Route::apiResource('companies', CompanyController::class)->only(['index', 'show']);
         Route::post('flights/search', [FlightController::class, 'search']);
         Route::post('reviews/{id}', [ReviewController::class, 'index']);
@@ -133,9 +135,6 @@ Route::middleware(['auth:sanctum'])->group(function () {
             Route::apiResource('companies', CompanyController::class)->only(['store', 'update', 'destroy']);
 
             Route::post('trip/tracking/{trip}', [TrackingController::class, 'update']);
-
-
-           
         });
 
         Route::delete('/logout', [AuthenticatedController::class, 'logout']);

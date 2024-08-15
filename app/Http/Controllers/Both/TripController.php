@@ -30,7 +30,7 @@ class TripController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'package_id' => ['required', Rule::exists('packages', 'id')],
-            'num_of_tickets' => ['required', 'gte:5', 'lte:100', 'numeric'],
+            'num_of_tickets' => ['required', 'gte:5', 'lte:100', 'integer'],
             'date' => ['required', 'date', 'after:today', Rule::exists('dates', 'date')],
             'time' => ['required', 'date_format:H:i:s']
         ]);
@@ -65,7 +65,7 @@ class TripController extends Controller
     public function update(TripDetail $trip, Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'num_of_tickets' => ['required', 'gte:5', 'lte:100', 'numeric'],
+            'num_of_tickets' => ['required', 'gte:5', 'lte:100', 'integer'],
             'date' => ['required', 'date', 'after:today', Rule::exists('dates', 'date')],
             'time' => ['required', 'date_format:H:i:s']
         ]);

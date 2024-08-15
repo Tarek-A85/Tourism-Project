@@ -9,7 +9,7 @@ use Illuminate\Http\Request;
 use  App\Http\Middleware\CanChangePasswordMiddleware;
 use  App\Http\Middleware\CheckEmailMiddleware;
 use  App\Http\Middleware\CheckAdminMiddleware;
-use  App\Http\Middleware\CheckWalletAvailablityMiddleware;
+use App\Http\Middleware\HasWalletMiddleware;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
@@ -27,7 +27,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'check_email' => CheckEmailMiddleware::class,
             'check_admin' => CheckAdminMiddleware::class,
             'is_user' => UserMiddleware::class,
-            'check_wallet' => CheckWalletAvailablityMiddleware::class,
+            'has_wallet' => HasWalletMiddleware::class,
 
         ]);
     })
