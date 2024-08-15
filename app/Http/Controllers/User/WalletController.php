@@ -75,4 +75,30 @@ class WalletController extends Controller
         return $this->success("your wallet password is changed successfully");
 
     }
+
+    public function add_balance_to_wallet(Request $request){
+
+        $validator = Validator::make($request->all(), [
+            'wallet_id' => ['required', 'exists:wallets,id'],
+            'balance' => ['required', 'numeric'],
+        ]);
+
+        if($validator->fails()){
+            return $this->fail($validator->errors()->first());
+        }
+
+        $wallet = Wallet::findOrFail($request->wallet_id);
+
+        if($wallet->balance + $request->balance > 999999999999){
+            return $this->fail('wallet balance will be more than allowed, you cant do that');
+        }
+
+        $wallet->update([
+            'balance' => $wallet->balance + $request->balance,
+        ]);
+
+        return $this->success('The balance is added to the wallet successfully');
+
+
+    }
 }

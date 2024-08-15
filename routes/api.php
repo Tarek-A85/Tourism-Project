@@ -135,6 +135,8 @@ Route::middleware(['auth:sanctum'])->group(function () {
             Route::apiResource('companies', CompanyController::class)->only(['store', 'update', 'destroy']);
 
             Route::post('trip/tracking/{trip}', [TrackingController::class, 'update']);
+
+            Route::post('add/to/wallet', [WalletController::class, 'add_balance_to_wallet']);
         });
 
         Route::delete('/logout', [AuthenticatedController::class, 'logout']);
