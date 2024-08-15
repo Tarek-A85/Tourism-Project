@@ -73,7 +73,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
                 Route::post('/package/transaction', [PackageTransactionController::class, 'store']);
                 Route::put('/package/transaction/{packageTransaction}', [PackageTransactionController::class, 'update']);
                 Route::delete('/package/transaction/{packageTransaction}', [PackageTransactionController::class, 'destroy']);
-                Route::get('/package/transaction/{packageTransaction}',[PackageTransactionController::class,'show']);
+                Route::get('/package/transaction/{packageTransaction}', [PackageTransactionController::class, 'show']);
 
                 Route::post('add/flight/transaction', [FlightTransactionController::class, 'store']);
                 Route::post('available/updates/for/flight/transaction/{id}', [FlightTransactionController::class, 'available_flights_to_update']);
@@ -148,9 +148,9 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::apiResource('regions', RegionController::class)->only(['index', 'show']);
         Route::apiResource('hotels', HotelController::class)->only(['index', 'show']);
         Route::apiResource('package', PackageController::class)->only(['index', 'show']);
+        Route::get('package_top_rating', [PackageController::class, 'top_rating']);
         Route::get('packageTypes', PackageTypeController::class);
         Route::get('package/trip/{package}', [TripController::class, 'index']);
-        //check transaction
         Route::get('trip/tracking/{trip}', [TrackingController::class, 'tracking']);
     });
 });

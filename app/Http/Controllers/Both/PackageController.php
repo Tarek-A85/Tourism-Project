@@ -46,9 +46,18 @@ class PackageController extends Controller
         ]);
     }
 
+    public function top_rating()
+    {
+        $packages = Package::get();
+        $packages = $packages->sortByDesc('rating.stars');
+        $packages->append(['countries', 'image']);
+        $packages->setHidden(['package_areas', 'deleted_at', 'updated_at', 'created_at', 'description']);
+        return $this->success('Top rating packages', ['packages' => $packages->values()->take(10)]);
+    }
+
     public function index()
     {
-        $packages = Package::latest()->filter(request(['search','type']))->OrderBy('id', 'DESC')->get();
+        $packages = Package::latest()->filter(request(['search', 'type']))->OrderBy('id', 'DESC')->get();
         $packages->append(['countries', 'image']);
         $packages->setHidden(['package_areas', 'deleted_at', 'updated_at', 'created_at', 'description']);
         return $this->success('All packages', ['packages' => $packages]);
@@ -56,7 +65,7 @@ class PackageController extends Controller
 
     public function index_archived()
     {
-        $packages = Package::onlyTrashed()->latest()->filter(request(['search','type']))->select('id', 'name')->get();
+        $packages = Package::onlyTrashed()->latest()->filter(request(['search', 'type']))->select('id', 'name')->get();
         $packages->setHidden(['package_areas']);
         return $this->success('All archived packages', ['packages' => $packages]);
     }
@@ -64,9 +73,9 @@ class PackageController extends Controller
     public function show($id)
     {
         if (auth()->user()->is_admin)
-            $package = Package::withTrashed()->with(['types:id,name', 'companies','package_areas'])->findOrFail($id);
+            $package = Package::withTrashed()->with(['types:id,name', 'companies', 'package_areas'])->findOrFail($id);
         else
-            $package = Package::with(['types:id,name', 'companies','package_areas'])->findOrFail($id);
+            $package = Package::with(['types:id,name', 'companies', 'package_areas'])->findOrFail($id);
 
         $package->makeVisible('package_areas');
         $package->images = $package->images;
@@ -158,54 +167,60 @@ class PackageController extends Controller
         ];
 
         $validator = Validator::make($request->all(), [
-            'name' => ['required', Rule::unique('packages', 'name')->where(fn ($query) => $query->where('id', '!=', $package->id))],
+            'name' => ['required', Rule::unique('packages', 'name')->where(fn($query) => $query->where('id', '!=', $package->id))],
             'description' => ['required'],
             'period' => ['required', 'numeric', 'gte:0'],
             'adult_price' => ['required', 'decimal:2'],
             'child_price' => ['required', 'decimal:2'],
             'deleted_hotels' => ['array', 'nullable'],
             'deleted_hotels.*' => [
-                'required', 'numeric',
+                'required',
+                'numeric',
                 Rule::exists('package_areas', 'visitable_id')
-                    ->where(fn ($query) => $query->where('package_id', $package->id)
+                    ->where(fn($query) => $query->where('package_id', $package->id)
                         ->where('visitable_type', 'Hotel'))
             ],
             'modify_hotels' => ['array', 'nullable'],
             'modify_hotels.*.id' => [
-                'required', 'numeric',
+                'required',
+                'numeric',
                 Rule::exists('package_areas', 'visitable_id')
-                    ->where(fn ($query) => $query->where('package_id', $package->id)
+                    ->where(fn($query) => $query->where('package_id', $package->id)
                         ->where('visitable_type', 'Hotel'))
             ],
             'modify_hotels.*.period' => ['required', 'numeric'],
             'added_hotels' => ['array', 'nullable'],
             'added_hotels.*.id' => [
-                'required', Rule::exists('hotels', 'id'),
+                'required',
+                Rule::exists('hotels', 'id'),
                 Rule::unique('package_areas', 'visitable_id')
-                    ->where(fn ($query) => $query->where('package_id', $package->id)
+                    ->where(fn($query) => $query->where('package_id', $package->id)
                         ->where('visitable_type', 'Hotel'))
             ],
             'added_hotels.*.period' => ['required', 'numeric'],
             'deleted_regions' => ['array', 'nullable'],
             'deleted_regions.*' => [
-                'required', 'numeric',
+                'required',
+                'numeric',
                 Rule::exists('package_areas', 'visitable_id')
-                    ->where(fn ($query) => $query->where('package_id', $package->id)
+                    ->where(fn($query) => $query->where('package_id', $package->id)
                         ->where('visitable_type', 'Region'))
             ],
             'modify_regions' => ['array', 'nullable'],
             'modify_regions.*.id' => [
-                'required', 'numeric',
+                'required',
+                'numeric',
                 Rule::exists('package_areas', 'visitable_id')
-                    ->where(fn ($query) => $query->where('package_id', $package->id)
+                    ->where(fn($query) => $query->where('package_id', $package->id)
                         ->where('visitable_type', 'Region'))
             ],
             'modify_regions.*.period' => ['required', 'numeric'],
             'added_regions' => ['array', 'nullable'],
             'added_regions.*.id' => [
-                'required', Rule::exists('regions', 'id'),
+                'required',
+                Rule::exists('regions', 'id'),
                 Rule::unique('package_areas', 'visitable_id')
-                    ->where(fn ($query) => $query->where('package_id', $package->id)
+                    ->where(fn($query) => $query->where('package_id', $package->id)
                         ->where('visitable_type', 'Region'))
             ],
             'added_regions.*.period' => ['required', 'numeric'],
@@ -217,7 +232,7 @@ class PackageController extends Controller
             'deleted_types.*' => [
                 'required',
                 Rule::exists('package_type', 'type_id')
-                    ->where(fn ($query) => $query->where('package_id', $package->id))
+                    ->where(fn($query) => $query->where('package_id', $package->id))
             ],
             'added_types' => ['nullable', 'array'],
             'added_types.*' => ['required', 'string', 'regex:/^[a-zA-Z ]+$/'],
@@ -225,7 +240,7 @@ class PackageController extends Controller
             'deleted_companies.*' => [
                 'required',
                 Rule::exists('company_package', 'company_id')
-                    ->where(fn ($query) => $query->where('package_id', $package->id))
+                    ->where(fn($query) => $query->where('package_id', $package->id))
             ],
             'added_companies' => ['nullable', 'array'],
             'added_companies.*' => ['required', 'numeric', Rule::exists('companies', 'id')]
