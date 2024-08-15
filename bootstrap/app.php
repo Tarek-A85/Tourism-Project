@@ -66,15 +66,15 @@ return Application::configure(basePath: dirname(__DIR__))
             });
 
 
-        $exceptions->render(function (Exception $e, Request $request){
-            if ($request->wantsJson()) {
-                return response()->json([
-                    "status" => false,
-                    "message" => "Something went wrong",
-                    "data" => null,
-                ]);
-            }
-            });
+        // $exceptions->render(function (Exception $e, Request $request){
+        //     if ($request->wantsJson()) {
+        //         return response()->json([
+        //             "status" => false,
+        //             "message" => "Something went wrong",
+        //             "data" => null,
+        //         ]);
+        //     }
+        //     });
 
   
 

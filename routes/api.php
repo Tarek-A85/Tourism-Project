@@ -21,6 +21,7 @@ use App\Http\Controllers\Both\{
     TripController,
     TrackingController,
     HotelTransactionController,
+    ProfileController,
     TransactionController,
 };
 use App\Http\Controllers\User\{
@@ -102,6 +103,8 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::get('show/hotel/transaction/{id}', [HotelTransactionController::class, 'show']);
         Route::get('show/flight/transaction/{id}', [FlightTransactionController::class, 'show']);
         Route::get('airport', [AirportController::class, 'index']);
+        Route::get('profile/{user}', [ProfileController::class, 'show']);
+        Route::put('profile/{user}', [ProfileController::class, 'update']);
 
 
 
