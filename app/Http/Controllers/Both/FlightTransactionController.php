@@ -500,6 +500,14 @@ class FlightTransactionController extends Controller
 
         $return_flight = null;
 
+            $going_detail->update([
+                'available_tickets' => $going_detail->available_tickets +( $flight_transaction[0]->adult_number - $request->adults_number ),
+            ]);
+
+            $going_detail->update([
+                'available_tickets' => $going_detail->available_tickets + ($flight_transaction[0]->children_number - $request->children_numbe),
+            ]);
+
         $flight_transaction[0]->update([
             'flight_detail_id' => $request->going_id,
             'flight_type_id' => $going_detail->class->id,
@@ -516,6 +524,14 @@ class FlightTransactionController extends Controller
             $return_time = $return_detail->flight_time;
 
             $return_flight = $return_time->flight;
+
+            $return_detail->update([
+                'available_tickets' => $return_detail->available_tickets +( $flight_transaction[0]->adult_number - $request->adults_number ),
+            ]);
+
+            $return_detail->update([
+                'available_tickets' => $return_detail->available_tickets + ($flight_transaction[0]->children_number - $request->children_numbe),
+            ]);
 
             $flight_transaction[1]->update([
                 'flight_detail_id' => $request->return_id,
@@ -619,6 +635,22 @@ class FlightTransactionController extends Controller
 
         if($transaction->created_at > now()->addDays(1)){
             return $this->fail('You cant cancel the reservation because you reserved before more than a day');
+        }
+
+        $going_detail->update([
+            'available_tickets' => $going_detail->available_tickets + $flight_transaction[0]->adult_number + $flight_transaction[0]->children_number,
+        ]);
+
+        if($flight_transaction->count() > 1){
+
+            $return_detail = $flight_transaction[1]->flight_details;
+
+            $return_detail->update([
+                'available_tickets' => $return_detail->available_tickets + $flight_transaction[1]->adult_number + $flight_transaction[0]->children_number,
+            ]);
+
+
+
         }
 
         $wallet = $transaction->wallet;
