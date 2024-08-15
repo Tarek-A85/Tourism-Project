@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\DB;
 
 class Transaction extends Model
 {
@@ -11,22 +12,39 @@ class Transaction extends Model
 
     protected $fillable = ['wallet_id', 'transaction_type_id', 'status_id', 'price', 'name', 'email'];
 
-    public function wallet(){
+    public function delete()
+    {
+
+        if ($this->type->name == 'Package') {
+            $wallet = $this->wallet;
+            $wallet->update([
+                'balance' => $wallet->balance + $this->price
+            ]);
+        }
+
+        DB::table($this->table)->where('id', $this->id)->delete();
+    }
+
+    public function wallet()
+    {
 
         return $this->belongsTo(Wallet::class);
     }
 
-    public function status(){
+    public function status()
+    {
 
         return $this->belongsTo(Status::class);
     }
 
-    public function type(){
+    public function type()
+    {
 
         return $this->belongsTo(TransactionType::class, 'transaction_type_id');
     }
 
-    public function hotel_transactions(){
+    public function hotel_transactions()
+    {
 
         return $this->hasOne(HotelTransaction::class);
     }

@@ -111,6 +111,7 @@ class PackageController extends Controller
             'description' => $request->description,
             'adult_price' => $request->adult_price,
             'child_price' => $request->child_price,
+            'period' => $request->period,
         ]);
 
         $package->companies()->syncWithoutDetaching($request->flight_companies);
@@ -347,22 +348,16 @@ class PackageController extends Controller
 
         return $this->success("Package $package->name restored");
     }
-    //update delete condition and add cancel tickets
+
     public function destroy($id)
     {
         $package = Package::withTrashed()->findOrFail($id);
 
         $trips = $package->trip_detail;
-
         if (!empty($trips)) {
             foreach ($trips as $trip) {
-                if ($trip->date->date < now() /*&&  have transaction*/)
+                if ($trip->date->date < now() && sizeof($trip->packageTransaction))
                     return $this->fail("You can't permenentaly delete this Package, it's used at some places");
-            }
-
-            foreach ($trips as $trip) {
-                $trip->delete();
-                //cancel all tickets
             }
         }
 

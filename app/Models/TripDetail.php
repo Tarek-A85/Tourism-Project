@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\DB;
 
 class TripDetail extends Model
 {
@@ -13,6 +14,14 @@ class TripDetail extends Model
     protected $table = 'package_details';
     protected $with = ['date'];
     protected $hidden = ['delay','current_area'];
+
+    public function delete(){
+        $package_transactions = $this->packageTransaction;
+        foreach($package_transactions as $package_transaction){
+            $package_transaction->transaction->delete();
+        }
+        DB::table($this->table)->where('id', $this->id)->delete();
+    }
 
     public function date()
     {

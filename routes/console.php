@@ -146,4 +146,31 @@ Artisan::command('change_flight_transaction_status', function(){
 
 });
 
+Artisan::command('change_package_transaction_status', function(){
+
+    $transactions = Transaction::where('transaction_type_id', TransactionType::where('name', 'Package')->first()->id)->get();
+
+    foreach($transactions as $transaction){
+
+        $package_transaction = $transaction->package_transactions;
+        $trip = $transaction->package_transactions->tripDetail;
+
+        if($trip->date->date >= now()->toDateString() ){
+
+            if($trip->current_area == -1){
+
+            $transaction->update([
+                'status_id' => Status::where('name', 'Completed')->first()->id,
+            ]);
+        }
+        else{
+
+            $transaction->update([
+                'status_id' => Status::where('name', 'In progress')->first()->id,
+            ]);
+        }
+        } 
+    }
+});
+
 

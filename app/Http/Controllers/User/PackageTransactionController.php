@@ -33,7 +33,7 @@ class PackageTransactionController extends Controller
                 Rule::exists('package_details', 'id')
             ],
             'children_number' => ['required', 'integer'],
-            'adult_number' => ['required', 'integer']
+            'adult_number' => ['required', 'integer','gte:1']
         ]);
         if ($validator->fails()) {
             return $this->fail($validator->errors()->first());
@@ -57,6 +57,7 @@ class PackageTransactionController extends Controller
 
         if ($wallet->balance < $total_price)
             return $this->fail('You dont have enough balance to make this transaction');
+        
 
         //transaction
         //create transaction
@@ -68,6 +69,7 @@ class PackageTransactionController extends Controller
             'status_id' => Status::where('name', 'Has not started yet')->first()->id,
             'price' => $total_price,
         ]);
+        
 
         //create package transaction
         PackageTransaction::create([
@@ -95,7 +97,6 @@ class PackageTransactionController extends Controller
         $details[5] = 'children total price: ' .  $children_total_price;
         $details[6] =  'total price: ' . $total_price;
         $details[7] =  'date and time of the trip: ' . $trip->date->date . '  ' . $trip->time;
-        $details[8] =  'Expected ending date: ' . $trip->date->date + ($package->period)/24;
 
 
         if ($request->name) {

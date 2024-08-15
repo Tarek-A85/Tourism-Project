@@ -16,14 +16,22 @@ class Package extends Model
     protected $appends = ['image', 'rating'];
 
     public function scopeFilter($query, $filters)
-    {
+    {   
+        $query->when(
+            $filters['type'] ?? false,
+            fn ($query, $type)
+            =>
+            $query->whereHas('types', fn ($query) => $query
+                ->where('name', $type))
+        );
+
         $query->when(
             $filters['search'] ?? false,
             fn ($query, $search)
             => $query->where('name', 'like', '%' . $search . '%')
-                ->orWhereHas('package_areas', fn ($query) => $query
-                    ->where('package_areas.visitable_id', Region::where(fn($query)=>$query->where('name','like', '%' . $search . '%'))->first()->id ?? 0)
-                    ->where('package_areas.visitable_type', 'Region'))
+            ->orWhereHas('package_areas', fn ($query) => $query
+            ->where('package_areas.visitable_id', Region::where(fn($query)=>$query->where('name','like', '%' . $search . '%'))->first()->id ?? 0)
+            ->where('package_areas.visitable_type', 'Region'))
         );
 
         $query->when(
@@ -39,7 +47,13 @@ class Package extends Model
     {
         $this->favorite()->forceDelete();
 
+        $trips = $this->trip_detail;
+        foreach($trips as $trip){
+                $trip->delete();
+        }
+
         DB::table($this->table)->where('id', $this->id)->delete();
+
     }
 
     public function getImageAttribute()

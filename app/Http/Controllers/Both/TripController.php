@@ -106,14 +106,13 @@ class TripController extends Controller
         return $this->success('The trip update successfully');
     }
 
-    //update delete condition
+
     public function destroy($id)
     {
         $trip = TripDetail::where('id', $id)->firstOrFail();
-        if ($trip->date->date < now() /*&& there is a transaction*/) {
+        if ($trip->date->date < now() && sizeof($trip->packageTransaction)) {
             return $this->fail('You can\'t delete a trip already started');
         }
-        //cancel all transaction then delete
         $trip->delete();
         return $this->success('The trip deleted successfully');
     }
