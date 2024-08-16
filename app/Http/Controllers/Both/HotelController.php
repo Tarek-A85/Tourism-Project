@@ -297,7 +297,7 @@ class HotelController extends Controller
         foreach($hotels as $hotel){
             $hotel->image = $hotel->images[0];
         }
-
+        
         return $this->success('All hotels with regions', ["hotels" => $hotels]);
     }
 }

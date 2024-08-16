@@ -13,6 +13,8 @@ use Illuminate\Validation\Rule;
 use Exception;
 use Illuminate\Support\Str;
 use App\Traits\GeneralTrait;
+use PDO;
+
 class RegionController extends Controller
 {
     use GeneralTrait;
@@ -23,6 +25,10 @@ class RegionController extends Controller
     {
         
         $countries = Region::where('region_id', null)->select('id', 'name')->OrderBy('name')->get();
+
+        foreach($countries as $country){
+            $country->image = $country->images[0];
+        }
 
         return $this->success("All countries", ["countries" => $countries]);
 

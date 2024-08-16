@@ -53,5 +53,8 @@ class HotelSeeder extends Seeder
             'name' => 'Sheraton_pic_1.png',
             'folder_id' => $hotel_folder->id,
         ]);
+
+
+        
     }
 }
