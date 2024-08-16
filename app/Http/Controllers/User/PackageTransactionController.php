@@ -285,10 +285,11 @@ class PackageTransactionController extends Controller
     public function show(Transaction $transaction)
     {
         $packageTransaction = $transaction->package_transactions;
-        
+        $package = Package::withTrashed()->where('id',$packageTransaction->tripDetail->package_id)->select('id','name','deleted_at')->first();
+        $package->setHidden(['image','rating']);
         $data=[];
         $data['id'] = $packageTransaction->id;
-        $data['package'] = $packageTransaction->tripDetail->package->only('id','name','deleted_at');
+        $data['package'] = $package;
         $data['trip'] =$packageTransaction->tripDetail->only('id','time','date');
         $data['transaction_info'] = $packageTransaction->only('adult_number','adult_total_price','children_number','children_total_price');
         $data['transaction_info']['transaaction_id'] = $transaction->id;
