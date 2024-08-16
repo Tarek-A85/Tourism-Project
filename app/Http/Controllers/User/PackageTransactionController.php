@@ -288,7 +288,7 @@ class PackageTransactionController extends Controller
         
         $data=[];
         $data['id'] = $packageTransaction->id;
-        $data['package'] = $packageTransaction->tripDetail->package->only('id','name');
+        $data['package'] = $packageTransaction->tripDetail->package->only('id','name','deleted_at');
         $data['trip'] =$packageTransaction->tripDetail->only('id','time','date');
         $data['transaction_info'] = $packageTransaction->only('adult_number','adult_total_price','children_number','children_total_price');
         $data['transaction_info']['transaaction_id'] = $transaction->id;
