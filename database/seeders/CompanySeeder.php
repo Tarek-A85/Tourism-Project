@@ -76,9 +76,66 @@ class CompanySeeder extends Seeder
             }
         }
 
-       
+    }
 
 
+    /////////////////////////////////////////
+
+    $second_description = "An amazing airline whic makes you comfortable with every trip";
+
+    foreach(['Neos', 'ITA airways'] as $company){
+
+        $instance = Company::create([
+            'name' => $company,
+            'description' => $second_description,
+            'country_id' => Region::where('name', 'Italy')->first()->id,
+        ]);
+
+        $parent = Folder::firstOrCreate([
+            'name' => 'Italy',
+            'folder_id' => 6,
+        ]);
+
+        $child = Folder::create([
+            'name' => $company,
+            'folder_id' => $parent->id,
+        ]);
+
+        Storage::makeDirectory('Companies/Italy/' . $company);
+
+        for($j = 1; $j <= 3; $j++){
+            Photo::create([
+                'name' => $company . '_pic_' . $j . '.png',
+                'folder_id' => $child->id,
+
+            ]);
+        Storage::copy('seeding_pictures/' . $company . '_pic_' . $j . '.png', 'Companies/Italy/' . $company . '/' . $company . '_pic_' . $j . '.png');
+        }
+
+        $flights = Flight::factory()->count(3)->create([
+            'company_id' =>  $instance->id,
+        ]);
+
+        foreach($flights as $flight){
+
+            $times =  FlightTime::factory()->count(10)->create([
+                'flight_id' => $flight->id,
+            ]);
+
+            foreach($times as $time){
+
+                $first_class = FlightDetail::factory()->create([
+                    'flight_time_id' => $time->id,
+                    'flight_type_id' => FlightType::where('name', 'First class')->first()->id, 
+                 ]);
+
+                 FlightDetail::factory()->EconomyPrice($first_class->adult_price,
+                 $first_class->child_price,
+                 $time->id)->create();
+
+            }
+
+        }
 
     }
 

@@ -13,7 +13,7 @@ class PackageTypeSeeder extends Seeder
      */
     public function run(): void
     {
-        $types = ['food', 'learning'];
+        $types = ['food', 'learning', 'hiking', 'winter', 'summer', 'autumn', 'spring', 'natural views', 'modern archeticture', 'forests'];
         foreach ($types as $name)
             TypeOfPackage::create([
                 'name' => $name
